@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Horizon\Arch\Bootstrap\Pipes;
+
+use Closure;
+use Horizon\Arch\Bootstrap\ApplicationBuilder;
+use Horizon\Arch\Http\HttpKernel;
+use Horizon\Arch\Pipeline\PipeInterface;
+use Horizon\Contracts\Arch\Application\ApplicationContract;
+use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Contracts\Http\HttpKernel\HttpKernelContract;
+
+class RegisterCoreBindings implements PipeInterface
+{
+    /**
+     * @param  ApplicationBuilder  $payload
+     * @param  Closure(ApplicationBuilder): mixed  $next
+     */
+    public function handle(mixed $payload, Closure $next): mixed
+    {
+        $app = $payload->app;
+
+        $app->instance(
+            ApplicationContract::class,
+            $app
+        );
+
+        $app->instance(
+            ContainerContract::class,
+            $app->getContainer()
+        );
+
+        $app->singleton(
+            HttpKernelContract::class,
+            HttpKernel::class
+        );
+
+        return $next($payload);
+    }
+}

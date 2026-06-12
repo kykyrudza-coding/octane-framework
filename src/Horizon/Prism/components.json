@@ -1,0 +1,7 @@
+{
+    "provider": "Horizon\\Prism\\Providers\\PrismServiceProvider",
+    "name": "octane/prism",
+    "dependencies": {
+
+    }
+}

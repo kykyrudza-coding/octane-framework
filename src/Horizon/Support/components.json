@@ -1,0 +1,7 @@
+{
+    "provider": "Horizon\\Support\\Providers\\SupportServiceProvider",
+    "name": "octane/support",
+    "dependencies": {
+
+    }
+}

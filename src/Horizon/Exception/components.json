@@ -1,0 +1,7 @@
+{
+    "provider": "Horizon\\Exception\\Providers\\ExceptionServiceProvider",
+    "name": "octane/exception-handler",
+    "dependencies": {
+
+    }
+}

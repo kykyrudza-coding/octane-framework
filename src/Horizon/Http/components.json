@@ -1,0 +1,7 @@
+{
+    "provider": "Horizon\\Http\\Providers\\RouteServiceProvider",
+    "name": "octane/http",
+    "dependencies": {
+
+    }
+}

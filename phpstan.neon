@@ -1,0 +1,12 @@
+parameters:
+    level: max
+
+    paths:
+        - src
+
+    excludePaths:
+        - src/Horizon/Exception/Views/error.php
+
+    tmpDir: .phpstan
+
+    treatPhpDocTypesAsCertain: true
