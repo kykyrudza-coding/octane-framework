@@ -192,7 +192,7 @@ final class TemplateContext
         }
 
         throw new RuntimeException(
-            "View '$view' not found in '{$this->viewsPath}'."
+            "View '$view' not found in '$this->viewsPath'."
         );
     }
 }

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Horizon\Arch\Http;
 
-use Horizon\Arch\Http\Handle\BindRouteParameters;
-use Horizon\Arch\Http\Handle\InvokeController;
-use Horizon\Arch\Http\Handle\ResolveRoute;
-use Horizon\Arch\Http\Handle\RunGlobalMiddleware;
-use Horizon\Arch\Http\Handle\RunGroupMiddleware;
-use Horizon\Arch\Http\Handle\RunRouteMiddleware;
+use Horizon\Arch\Http\Pipes\BindRouteParameters;
+use Horizon\Arch\Http\Pipes\InvokeController;
+use Horizon\Arch\Http\Pipes\ResolveRoute;
+use Horizon\Arch\Http\Pipes\RunGlobalMiddleware;
+use Horizon\Arch\Http\Pipes\RunGroupMiddleware;
+use Horizon\Arch\Http\Pipes\RunRouteMiddleware;
 use Horizon\Arch\Pipeline\Pipeline;
 use Horizon\Contracts\Arch\Application\ApplicationContract;
 use Horizon\Contracts\Http\HttpKernel\HttpKernelContract;

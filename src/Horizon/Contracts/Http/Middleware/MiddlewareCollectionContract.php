@@ -22,11 +22,6 @@ interface MiddlewareCollectionContract
     public function api(array $middleware): static;
 
     /**
-     * @param  list<string>  $middleware
-     */
-    public function console(array $middleware): static;
-
-    /**
      * @return list<string>
      */
     public function getGlobal(): array;
@@ -40,11 +35,6 @@ interface MiddlewareCollectionContract
      * @return list<string>
      */
     public function getApi(): array;
-
-    /**
-     * @return list<string>
-     */
-    public function getConsole(): array;
 
     /**
      * @return list<string>

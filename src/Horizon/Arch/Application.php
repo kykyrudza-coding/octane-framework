@@ -11,6 +11,7 @@ use Horizon\Arch\Traits\ApplicationEnvironment;
 use Horizon\Arch\Traits\ManagesApplicationPaths;
 use Horizon\Contracts\Arch\Application\ApplicationContract;
 use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Contracts\Console\ConsoleKernelContract;
 use Horizon\Contracts\Http\HttpKernel\HttpKernelContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
@@ -31,7 +32,7 @@ class Application implements ApplicationContract
     protected RequestContextContract $requestContext;
 
     /**
-     * @var array<class-string<ServiceProviderContract>, \Horizon\Contracts\Support\Providers\ServiceProviderContract>
+     * @var array<class-string<ServiceProviderContract>, ServiceProviderContract>
      */
     protected array $providers = [];
 
@@ -90,7 +91,7 @@ class Application implements ApplicationContract
         $this->providers = $providers;
     }
 
-    public function registerProvider(\Horizon\Contracts\Support\Providers\ServiceProviderContract $provider): void
+    public function registerProvider(ServiceProviderContract $provider): void
     {
         $class = $provider::class;
 
@@ -136,6 +137,17 @@ class Application implements ApplicationContract
         $response->send();
 
         $kernel->terminate($this->requestContext, $response);
+    }
+
+    public function runCli(array $argv): int
+    {
+        $kernel = $this->make(ConsoleKernelContract::class);
+
+        $exitCode = $kernel->handle($argv);
+
+        $this->terminate();
+
+        return $exitCode;
     }
 
     /**

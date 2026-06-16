@@ -2,20 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Horizon\Arch\Http\Handle;
+namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
 use Horizon\Arch\Pipeline\PipeInterface;
 use Horizon\Arch\Pipeline\Pipeline;
 use Horizon\Contracts\Arch\Container\ContainerContract;
-use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 
-class RunGlobalMiddleware implements PipeInterface
+class RunRouteMiddleware implements PipeInterface
 {
     public function __construct(
         protected ContainerContract $container,
-        protected MiddlewareCollectionContract $middlewareCollection,
     ) {}
 
     /**
@@ -24,7 +22,7 @@ class RunGlobalMiddleware implements PipeInterface
      */
     public function handle(mixed $payload, Closure $next): mixed
     {
-        $middlewares = $this->middlewareCollection->getGlobal();
+        $middlewares = $payload->getRoute()?->middleware() ?? [];
 
         if (empty($middlewares)) {
             return $next($payload);

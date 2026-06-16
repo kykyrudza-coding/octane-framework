@@ -17,6 +17,6 @@ final class BlockDirective implements DirectiveContract
     {
         $expression = trim($expression, "'\"");
 
-        return "<?php \$__prism->startBlock('{$expression}'); ?>";
+        return "<?php \$__prism->startBlock('$expression'); ?>";
     }
 }

@@ -11,12 +11,12 @@ use Horizon\Contracts\Prism\ViewContract;
 use Horizon\Contracts\Prism\ViewFactoryContract;
 use Horizon\Prism\Prism\Component\ComponentRegistry;
 
-final class Prism implements PrismContract
+final readonly class Prism implements PrismContract
 {
     public function __construct(
-        private readonly ViewFactoryContract        $viewFactory,
-        private readonly DirectiveRegistryContract  $directives,
-        private readonly ComponentRegistry          $components,
+        private ViewFactoryContract       $viewFactory,
+        private DirectiveRegistryContract $directives,
+        private ComponentRegistry         $components,
     ) {}
 
     /**

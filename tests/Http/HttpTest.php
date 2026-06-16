@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Http;
 
 use Horizon\Arch\Container;
-use Horizon\Arch\Http\Handle\InvokeController;
+use Horizon\Arch\Http\Pipes\InvokeController;
 use Horizon\Contracts\Http\Request\RequestContract;
 use Horizon\Http\Request\Request;
 use Horizon\Http\Request\RequestContext;

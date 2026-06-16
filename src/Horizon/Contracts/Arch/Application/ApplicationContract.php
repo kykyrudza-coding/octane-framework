@@ -33,6 +33,8 @@ interface ApplicationContract
 
     public function run(): void;
 
+    public function runCli(array $argv): int;
+
     public static function configure(string $basePath): ApplicationBuilderContract;
 
     public function bind(string $abstract, callable|string $concrete): void;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Horizon\Arch\Http\Handle;
+namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
 use Horizon\Arch\Pipeline\PipeInterface;
@@ -25,12 +25,6 @@ class InvokeController implements PipeInterface
         protected ContainerContract $container,
     ) {}
 
-    /**
-     * @param  RequestContextContract  $payload
-     * @param  Closure(RequestContextContract): mixed  $next
-     *
-     * @throws ReflectionException
-     */
     public function handle(mixed $payload, Closure $next): mixed
     {
         $route = $payload->getRoute();
@@ -45,11 +39,13 @@ class InvokeController implements PipeInterface
         $result = match (true) {
             $action instanceof Closure => $action(...$this->resolveFunctionArguments($action, $payload, $params)),
             is_array($action) => $this->invokeArrayAction($action, $payload, $params),
-            default => $this->invokeStringAction($action, $payload, $params),
+            is_string($action) => $this->invokeStringAction($action, $payload, $params),
+            default => throw new RuntimeException('Invalid route action.'),
         };
 
         if (! $result instanceof ResponseContract) {
             $factory = $this->container->make(ResponseFactoryContract::class);
+
             if (! $factory instanceof ResponseFactoryContract) {
                 throw new RuntimeException('Response factory binding must resolve to a ResponseFactoryContract instance.');
             }
@@ -62,12 +58,6 @@ class InvokeController implements PipeInterface
         return $next($payload);
     }
 
-    /**
-     * @param  array{0: class-string, 1: string}  $action
-     * @param  array<string, string>  $params
-     *
-     * @throws ReflectionException
-     */
     protected function invokeArrayAction(array $action, RequestContextContract $context, array $params): mixed
     {
         [$controllerClass, $method] = $action;
@@ -78,14 +68,11 @@ class InvokeController implements PipeInterface
             throw new RuntimeException("Controller action $controllerClass@$method is not callable.");
         }
 
-        return $controller->{$method}(...$this->resolveMethodArguments($controller, $method, $context, $params));
+        return $controller->{$method}(
+            ...$this->resolveMethodArguments($controller, $method, $context, $params)
+        );
     }
 
-    /**
-     * @param  array<string, string>  $params
-     *
-     * @throws ReflectionException
-     */
     protected function invokeStringAction(string $action, RequestContextContract $context, array $params): mixed
     {
         if (! str_contains($action, '@')) {
@@ -100,15 +87,11 @@ class InvokeController implements PipeInterface
             throw new RuntimeException("Controller action $controllerClass@$method is not callable.");
         }
 
-        return $controller->{$method}(...$this->resolveMethodArguments($controller, $method, $context, $params));
+        return $controller->{$method}(
+            ...$this->resolveMethodArguments($controller, $method, $context, $params)
+        );
     }
 
-    /**
-     * @param  array<string, string>  $routeParams
-     * @return list<mixed>
-     *
-     * @throws ReflectionException
-     */
     protected function resolveMethodArguments(
         object $controller,
         string $method,
@@ -120,12 +103,6 @@ class InvokeController implements PipeInterface
         return $this->resolveParameters($reflection->getParameters(), $context, $routeParams);
     }
 
-    /**
-     * @param  array<string, string>  $routeParams
-     * @return list<mixed>
-     *
-     * @throws ReflectionException
-     */
     protected function resolveFunctionArguments(
         Closure $closure,
         RequestContextContract $context,
@@ -136,27 +113,27 @@ class InvokeController implements PipeInterface
         return $this->resolveParameters($reflection->getParameters(), $context, $routeParams);
     }
 
-    /**
-     * @param  list<ReflectionParameter>  $parameters
-     * @param  array<string, string>  $routeParams
-     * @return list<mixed>
-     */
-    protected function resolveParameters(array $parameters, RequestContextContract $context, array $routeParams): array
-    {
+    protected function resolveParameters(
+        array $parameters,
+        RequestContextContract $context,
+        array $routeParams
+    ): array {
         $arguments = [];
         $positionalRouteParams = array_values($routeParams);
 
         foreach ($parameters as $index => $parameter) {
-            $arguments[] = $this->resolveParameter($parameter, $context, $routeParams, $positionalRouteParams, $index);
+            $arguments[] = $this->resolveParameter(
+                $parameter,
+                $context,
+                $routeParams,
+                $positionalRouteParams,
+                $index
+            );
         }
 
         return $arguments;
     }
 
-    /**
-     * @param  array<string, string>  $routeParams
-     * @param  list<string>  $positionalRouteParams
-     */
     protected function resolveParameter(
         ReflectionParameter $parameter,
         RequestContextContract $context,
@@ -167,7 +144,7 @@ class InvokeController implements PipeInterface
         $name = $parameter->getName();
 
         if (array_key_exists($name, $routeParams)) {
-            return $routeParams[$name];
+            return $this->castRouteParameter($routeParams[$name], $parameter);
         }
 
         $type = $parameter->getType();
@@ -187,7 +164,7 @@ class InvokeController implements PipeInterface
         }
 
         if (array_key_exists($position, $positionalRouteParams)) {
-            return $positionalRouteParams[$position];
+            return $this->castRouteParameter($positionalRouteParams[$position], $parameter);
         }
 
         if ($parameter->isDefaultValueAvailable()) {
@@ -199,6 +176,27 @@ class InvokeController implements PipeInterface
         }
 
         throw new RuntimeException("Cannot resolve controller parameter \$$name.");
+    }
+
+    protected function castRouteParameter(string $value, ReflectionParameter $parameter): mixed
+    {
+        $type = $parameter->getType();
+
+        if (! $type instanceof ReflectionNamedType) {
+            return $value;
+        }
+
+        if (! $type->isBuiltin()) {
+            return $value;
+        }
+
+        return match ($type->getName()) {
+            'int' => (int) $value,
+            'float' => (float) $value,
+            'bool' => filter_var($value, FILTER_VALIDATE_BOOL),
+            'string' => $value,
+            default => $value,
+        };
     }
 
     protected function responseBody(mixed $result): string

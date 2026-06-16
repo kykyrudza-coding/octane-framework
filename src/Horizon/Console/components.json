@@ -1,0 +1,7 @@
+{
+    "provider": "Horizon\\Console\\Providers\\ConsoleServiceProvider",
+    "name": "octane/console",
+    "dependencies": {
+
+    }
+}

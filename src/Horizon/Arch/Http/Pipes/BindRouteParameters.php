@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Horizon\Arch\Http\Handle;
+namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
 use Horizon\Arch\Pipeline\PipeInterface;

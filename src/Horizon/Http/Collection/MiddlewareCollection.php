@@ -24,11 +24,6 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     protected array $api = [];
 
     /**
-     * @var list<string>
-     */
-    protected array $console = [];
-
-    /**
      * @param  list<string>  $middleware
      */
     public function global(array $middleware): static
@@ -54,16 +49,6 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     public function api(array $middleware): static
     {
         $this->api = array_merge($this->api, $middleware);
-
-        return $this;
-    }
-
-    /**
-     * @param  list<string>  $middleware
-     */
-    public function console(array $middleware): static
-    {
-        $this->console = array_merge($this->console, $middleware);
 
         return $this;
     }
@@ -95,20 +80,11 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     /**
      * @return list<string>
      */
-    public function getConsole(): array
-    {
-        return $this->console;
-    }
-
-    /**
-     * @return list<string>
-     */
     public function getGroup(string $group = 'web'): array
     {
         return match ($group) {
             'web' => $this->web,
             'api' => $this->api,
-            'console' => $this->console,
             default => $this->global,
         };
     }
