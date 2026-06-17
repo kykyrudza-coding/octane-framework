@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Horizon\Http\Providers;
 
+use Horizon\Contracts\Console\CommandRegistryContract;
+use Horizon\Http\Console\StartServerCommand;
 use Horizon\Support\Providers\ServiceProvider;
 use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
 use Horizon\Contracts\Http\Response\ResponseFactoryContract;
@@ -42,5 +44,11 @@ class RouteServiceProvider extends ServiceProvider
         $collection->global([
             ConvertEmptyStringsToNull::class,
         ]);
+
+        $commands = $this->app->make(CommandRegistryContract::class);
+
+        $commands->register(
+            StartServerCommand::class
+        );
     }
 }

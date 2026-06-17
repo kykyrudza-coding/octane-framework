@@ -11,8 +11,8 @@ use Horizon\Contracts\Console\ConsoleOutputContract;
 
 abstract class Command implements CommandContract
 {
-    public const SUCCESS = 0;
-    public const FAILURE = 1;
+    public const int SUCCESS = 0;
+    public const int FAILURE = 1;
 
     protected OutputStyle $style;
 
@@ -25,7 +25,11 @@ abstract class Command implements CommandContract
         return $this->handle($input, $output);
     }
 
-    abstract public function name(): string;
+    abstract public static function commandName(): string;
+    public function name(): string
+    {
+        return static::commandName();
+    }
 
     public function description(): string
     {

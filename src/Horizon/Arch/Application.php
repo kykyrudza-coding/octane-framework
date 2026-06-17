@@ -29,8 +29,11 @@ class Application implements ApplicationContract
 
     protected static ?self $instance = null;
 
-    protected RequestContextContract $requestContext;
+    protected ?RequestContextContract $requestContext = null;
 
+    protected bool $runningInConsole = false;
+
+    protected bool $booted = false;
     /**
      * @var array<class-string<ServiceProviderContract>, ServiceProviderContract>
      */
@@ -106,9 +109,15 @@ class Application implements ApplicationContract
 
     public function bootProviders(): void
     {
+        if ($this->booted) {
+            return;
+        }
+
         foreach ($this->providers as $provider) {
             $provider->boot();
         }
+
+        $this->booted = true;
     }
 
     /**
@@ -128,8 +137,14 @@ class Application implements ApplicationContract
     {
         $kernel = $this->make(HttpKernelContract::class);
 
+        $this->runningInConsole = false;
+
         if (! $kernel instanceof HttpKernelContract) {
             throw new RuntimeException('HTTP kernel binding must resolve to an HttpKernelContract instance.');
+        }
+
+        if (! isset($this->requestContext)) {
+            throw new RuntimeException('Request context has not been set.');
         }
 
         $response = $kernel->handle($this->requestContext);
@@ -141,6 +156,8 @@ class Application implements ApplicationContract
 
     public function runCli(array $argv): int
     {
+        $this->runningInConsole = true;
+
         $kernel = $this->make(ConsoleKernelContract::class);
 
         $exitCode = $kernel->handle($argv);
@@ -244,5 +261,10 @@ class Application implements ApplicationContract
         foreach ($this->terminateCallbacks as $callback) {
             $callback($this);
         }
+    }
+
+    public function isBooted(): bool
+    {
+        return $this->booted;
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Support\Traits;
 
-class Tappable
+trait Tappable
 {
     public function tap(callable $callback): static
     {

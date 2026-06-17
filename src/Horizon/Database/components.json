@@ -1,0 +1,7 @@
+{
+    "provider": "Horizon\\Database\\Providers\\DatabaseServiceProvider",
+    "name": "octane/database",
+    "dependencies": {
+
+    }
+}

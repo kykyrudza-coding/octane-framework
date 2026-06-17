@@ -10,12 +10,12 @@ use Horizon\Arch\Http\Pipes\ResolveRoute;
 use Horizon\Arch\Http\Pipes\RunGlobalMiddleware;
 use Horizon\Arch\Http\Pipes\RunGroupMiddleware;
 use Horizon\Arch\Http\Pipes\RunRouteMiddleware;
-use Horizon\Arch\Pipeline\Pipeline;
 use Horizon\Contracts\Arch\Application\ApplicationContract;
 use Horizon\Contracts\Http\HttpKernel\HttpKernelContract;
 use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
+use Horizon\Support\Pipeline\Pipeline;
 use RuntimeException;
 
 class HttpKernel implements HttpKernelContract

@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
-use Horizon\Arch\Pipeline\PipeInterface;
 use Horizon\Contracts\Arch\Container\ContainerContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Request\RequestContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
 use Horizon\Contracts\Http\Response\ResponseFactoryContract;
-use ReflectionException;
+use Horizon\Support\Pipeline\PipeInterface;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;

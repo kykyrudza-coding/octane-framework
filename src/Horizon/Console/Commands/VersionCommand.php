@@ -11,14 +11,14 @@ use Horizon\Contracts\Console\ConsoleOutputContract;
 
 final class VersionCommand extends Command
 {
-    public function name(): string
+    public static function commandName(): string
     {
         return 'version';
     }
 
     public function description(): string
     {
-        return 'Display Octane version.';
+        return 'Display Octane version information.';
     }
 
     public function handle(
@@ -28,7 +28,11 @@ final class VersionCommand extends Command
         $this->style->title('Octane Framework');
 
         $this->style->keyValue('Version', Application::version());
-        $this->style->keyValue('PHP', PHP_VERSION);
+        $this->style->keyValue('PHP',     PHP_VERSION);
+        $this->style->keyValue('OS',      PHP_OS_FAMILY);
+        $this->style->keyValue('SAPI',    PHP_SAPI);
+
+        $this->style->newLine();
 
         return self::SUCCESS;
     }

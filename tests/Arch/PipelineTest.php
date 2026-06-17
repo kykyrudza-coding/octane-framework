@@ -6,8 +6,8 @@ namespace Tests\Arch;
 
 use Closure;
 use Horizon\Arch\Container;
-use Horizon\Arch\Pipeline\PipeInterface;
-use Horizon\Arch\Pipeline\Pipeline;
+use Horizon\Support\Pipeline\PipeInterface;
+use Horizon\Support\Pipeline\Pipeline;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 

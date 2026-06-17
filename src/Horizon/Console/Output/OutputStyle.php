@@ -6,10 +6,10 @@ namespace Horizon\Console\Output;
 
 use Horizon\Contracts\Console\ConsoleOutputContract;
 
-final class OutputStyle
+final readonly class OutputStyle
 {
     public function __construct(
-        private readonly ConsoleOutputContract $output,
+        private ConsoleOutputContract $output,
     ) {
     }
 
@@ -69,5 +69,51 @@ final class OutputStyle
                 $value,
             ),
         );
+    }
+
+    public function badge(string $label, string $type = 'info'): void
+    {
+        $tag = "badge-{$type}";
+        $this->output->line(" <{$tag}> {$label} </{$tag}>");
+    }
+
+    public function divider(string $label = ''): void
+    {
+        $width = 60;
+
+        if ($label === '') {
+            $this->output->line('<dim>'.str_repeat('─', $width).'</dim>');
+            return;
+        }
+
+        $pad  = (int) (($width - mb_strlen($label) - 2) / 2);
+        $line = str_repeat('─', $pad).' '.$label.' '.str_repeat('─', $pad);
+        $this->output->line("<dim>{$line}</dim>");
+    }
+
+    public function twoColumn(string $left, string $right, int $width = 60): void
+    {
+        $dots = str_repeat('.', max(1, $width - mb_strlen($left) - mb_strlen($right)));
+        $this->output->line($left.'<dim>'.$dots.'</dim>'.$right);
+    }
+
+    public function spinner(): Spinner
+    {
+        return new Spinner($this->output);
+    }
+
+    public function progress(int $total): ProgressBar
+    {
+        return new ProgressBar($this->output, $total);
+    }
+
+    public function table(): Table
+    {
+        return new Table($this->output);
+    }
+
+    public function newLine(int $count = 1): void
+    {
+        $this->output->newLine($count);
     }
 }

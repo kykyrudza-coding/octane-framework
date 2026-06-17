@@ -7,8 +7,8 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
 use Horizon\Arch\Config\ConfigRepository;
-use Horizon\Arch\Pipeline\PipeInterface;
 use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
+use Horizon\Support\Pipeline\PipeInterface;
 
 class LoadConfiguration implements PipeInterface
 {

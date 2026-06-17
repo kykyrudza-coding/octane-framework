@@ -7,7 +7,7 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 use Closure;
 use Dotenv\Dotenv;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
-use Horizon\Arch\Pipeline\PipeInterface;
+use Horizon\Support\Pipeline\PipeInterface;
 
 class LoadEnvironment implements PipeInterface
 {

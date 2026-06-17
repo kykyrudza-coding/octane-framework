@@ -6,10 +6,10 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
-use Horizon\Arch\Pipeline\PipeInterface;
 use Horizon\Contracts\Exception\ExceptionHandlerContract;
 use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
 use Horizon\Contracts\Routing\RouteRegistrarContract;
+use Horizon\Support\Pipeline\PipeInterface;
 use RuntimeException;
 
 class ApplyBuilderCallbacks implements PipeInterface

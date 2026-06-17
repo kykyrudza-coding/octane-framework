@@ -14,14 +14,14 @@ interface ApplicationContract
     public function getContainer(): ContainerContract;
 
     /**
-     * @return array<class-string<\Horizon\Contracts\Support\Providers\ServiceProviderContract>, \Horizon\Contracts\Support\Providers\ServiceProviderContract>
+     * @return array<class-string<ServiceProviderContract>, ServiceProviderContract>
      */
     public function getProviders(): array;
 
     public static function version(): string;
 
     /**
-     * @param  array<class-string<\Horizon\Contracts\Support\Providers\ServiceProviderContract>, \Horizon\Contracts\Support\Providers\ServiceProviderContract>  $providers
+     * @param  array<class-string<ServiceProviderContract>, ServiceProviderContract>  $providers
      */
     public function setProviders(array $providers): void;
 
@@ -36,6 +36,10 @@ interface ApplicationContract
     public function runCli(array $argv): int;
 
     public static function configure(string $basePath): ApplicationBuilderContract;
+
+    public function basePath(string $path = ''): string;
+
+    public function dbPath(string $path = ''): string;
 
     public function bind(string $abstract, callable|string $concrete): void;
 

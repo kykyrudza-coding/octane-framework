@@ -1,6 +1,6 @@
 # Pipeline
 
-`Horizon\Arch\Pipeline\Pipeline` передає payload через послідовність об'єктів
+`Horizon\Support\Pipeline\Pipeline` передає payload через послідовність об'єктів
 із callable-методом `handle($payload, Closure $next)`.
 
 ```php

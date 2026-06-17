@@ -8,6 +8,8 @@ interface CommandContract
 {
     public function name(): string;
 
+    public static function commandName(): string;
+
     public function description(): string;
 
     public function handle(

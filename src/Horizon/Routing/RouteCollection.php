@@ -75,8 +75,14 @@ class RouteCollection implements RouteCollectionContract
         $uri = '/' . trim($uri, '/');
         $requestUri = '/' . trim($requestUri, '/');
 
+        /** /docs/{path*} -> /docs/(?P<path>.*) */
+        $pattern = preg_replace('/\{(\w+)\*}/', '(?P<$1>.*)', $uri);
+        if (! is_string($pattern)) {
+            return null;
+        }
+
         /** /posts/{id} -> /posts/(?P<id>[^/]+) */
-        $pattern = preg_replace('/\{(\w+)}/', '(?P<$1>[^/]+)', $uri);
+        $pattern = preg_replace('/\{(\w+)}/', '(?P<$1>[^/]+)', $pattern);
         if (! is_string($pattern)) {
             return null;
         }

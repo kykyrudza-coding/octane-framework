@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
-use Horizon\Arch\Pipeline\PipeInterface;
-use Horizon\Arch\Pipeline\Pipeline;
 use Horizon\Contracts\Arch\Container\ContainerContract;
 use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
+use Horizon\Support\Pipeline\PipeInterface;
+use Horizon\Support\Pipeline\Pipeline;
 
 class RunGlobalMiddleware implements PipeInterface
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Support\Traits;
 
-class Singleton
+trait Singleton
 {
     private static ?self $instance = null;
 

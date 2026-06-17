@@ -15,9 +15,9 @@ use Horizon\Arch\Bootstrap\Pipes\LoadEnvironment;
 use Horizon\Arch\Bootstrap\Pipes\RegisterCoreBindings;
 use Horizon\Arch\Bootstrap\Pipes\RegisterExceptionHandling;
 use Horizon\Arch\Bootstrap\Pipes\RegisterProviders;
-use Horizon\Arch\Pipeline\Pipeline;
 use Horizon\Contracts\Arch\Application\ApplicationBuilderContract;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
+use Horizon\Support\Pipeline\Pipeline;
 
 class ApplicationBuilder implements ApplicationBuilderContract
 {

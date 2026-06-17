@@ -6,8 +6,8 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
-use Horizon\Arch\Pipeline\PipeInterface;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
+use Horizon\Support\Pipeline\PipeInterface;
 use RuntimeException;
 
 class RegisterProviders implements PipeInterface

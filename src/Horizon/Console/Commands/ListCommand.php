@@ -15,7 +15,7 @@ final class ListCommand extends Command
         private readonly CommandRegistryContract $commands,
     ) {}
 
-    public function name(): string
+    public static function commandName(): string
     {
         return 'list';
     }
@@ -27,14 +27,22 @@ final class ListCommand extends Command
 
     public function handle(
         ConsoleInputContract $input,
-        ConsoleOutputContract $output
+        ConsoleOutputContract $output,
     ): int {
-        foreach ($this->commands->all() as $name => $command) {
-            $instance = app()->make($command);
+        $this->style->title('Octane Framework');
+        $this->style->section('Available commands');
 
-            $output->line($name.' - '.$instance->description());
+        foreach ($this->commands->all() as $name => $class) {
+            $instance = $this->commands->find($name);
+
+            $this->style->keyValue(
+                $name,
+                $instance?->description() ?? '',
+            );
         }
 
-        return 0;
+        $this->style->newLine();
+
+        return self::SUCCESS;
     }
 }

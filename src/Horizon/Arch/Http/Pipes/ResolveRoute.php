@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
-use Horizon\Arch\Pipeline\PipeInterface;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Routing\RouterContract;
+use Horizon\Support\Pipeline\PipeInterface;
 
 class ResolveRoute implements PipeInterface
 {

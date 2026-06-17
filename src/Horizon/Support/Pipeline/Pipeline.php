@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Horizon\Arch\Pipeline;
+namespace Horizon\Support\Pipeline;
 
 use Horizon\Contracts\Arch\Container\ContainerContract;
 use RuntimeException;

@@ -18,7 +18,12 @@ abstract class Facade
 
     public static function __callStatic(string $method, array $arguments)
     {
+        return static::getFacadeRoot()->$method(...$arguments);
+    }
+
+    public static function getFacadeRoot(): mixed
+    {
         return Application::getInstance()
-            ->make(static::getFacadeAccessor())->$method(...$arguments);
+            ->make(static::getFacadeAccessor());
     }
 }

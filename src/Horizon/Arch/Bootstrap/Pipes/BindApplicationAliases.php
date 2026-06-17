@@ -6,10 +6,10 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
-use Horizon\Arch\Pipeline\PipeInterface;
 use Horizon\Contracts\Arch\Application\ApplicationContract;
 use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Support\Pipeline\PipeInterface;
 
 class BindApplicationAliases implements PipeInterface
 {
