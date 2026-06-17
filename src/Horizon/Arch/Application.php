@@ -23,7 +23,7 @@ class Application implements ApplicationContract
 
     protected static string $octaneVersion = '2.0.0';
 
-    protected static string $octaneKernelVersion = '2.0.0';
+    protected static string $octaneKernelVersion = '0.1.0';
 
     protected ContainerContract $container;
 

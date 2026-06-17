@@ -8,17 +8,35 @@ use Horizon\Contracts\Console\ConsoleOutputContract;
 
 final class Table
 {
-    /** @var list<string> */
+    private const string TOP_LEFT = '┌';
+    private const string TOP_MID = '┬';
+    private const string TOP_RIGHT = '┐';
+    private const string MID_LEFT = '├';
+    private const string MID_MID = '┼';
+    private const string MID_RIGHT = '┤';
+    private const string BOTTOM_LEFT = '└';
+    private const string BOTTOM_MID = '┴';
+    private const string BOTTOM_RIGHT = '┘';
+    private const string HORIZONTAL = '─';
+    private const string VERTICAL = '│';
+
+    /**
+     * @var list<string>
+     */
     private array $headers = [];
 
-    /** @var list<list<string>> */
+    /**
+     * @var list<list<string>>
+     */
     private array $rows = [];
 
     public function __construct(
         private readonly ConsoleOutputContract $output,
     ) {}
 
-    /** @param list<string> $headers */
+    /**
+     * @param  list<string>  $headers
+     */
     public function setHeaders(array $headers): static
     {
         $this->headers = $headers;
@@ -26,7 +44,9 @@ final class Table
         return $this;
     }
 
-    /** @param list<string> $row */
+    /**
+     * @param  list<string>  $row
+     */
     public function addRow(array $row): static
     {
         $this->rows[] = $row;
@@ -34,7 +54,9 @@ final class Table
         return $this;
     }
 
-    /** @param list<list<string>> $rows */
+    /**
+     * @param  list<list<string>>  $rows
+     */
     public function setRows(array $rows): static
     {
         $this->rows = $rows;
@@ -46,22 +68,33 @@ final class Table
     {
         $widths = $this->columnWidths();
 
-        $this->output->line($this->separator($widths, '┌', '┬', '┐'));
-        $this->output->line($this->row($this->headers, $widths, header: true));
-        $this->output->line($this->separator($widths, '├', '┼', '┤'));
+        if ($widths === []) {
+            $this->output->line(Ansi::BRIGHT_BLACK.'No rows to display.'.Ansi::RESET);
+
+            return;
+        }
+
+        $this->output->line($this->separator($widths, self::TOP_LEFT, self::TOP_MID, self::TOP_RIGHT));
+
+        if ($this->headers !== []) {
+            $this->output->line($this->row($this->headers, $widths, header: true));
+            $this->output->line($this->separator($widths, self::MID_LEFT, self::MID_MID, self::MID_RIGHT));
+        }
 
         foreach ($this->rows as $row) {
             $this->output->line($this->row($row, $widths));
         }
 
-        $this->output->line($this->separator($widths, '└', '┴', '┘'));
+        $this->output->line($this->separator($widths, self::BOTTOM_LEFT, self::BOTTOM_MID, self::BOTTOM_RIGHT));
     }
 
-    /** @param list<int> $widths */
+    /**
+     * @param  list<int>  $widths
+     */
     private function separator(array $widths, string $left, string $mid, string $right): string
     {
         $parts = array_map(
-            static fn (int $w): string => str_repeat('─', $w + 2),
+            static fn (int $width): string => str_repeat(self::HORIZONTAL, $width + 4),
             $widths,
         );
 
@@ -71,44 +104,68 @@ final class Table
     }
 
     /**
-     * @param list<string> $cells
-     * @param list<int>    $widths
+     * @param  list<string>  $cells
+     * @param  list<int>  $widths
      */
     private function row(array $cells, array $widths, bool $header = false): string
     {
-        $border = Ansi::BRIGHT_BLACK.'│'.Ansi::RESET;
-        $parts  = [];
+        $border = Ansi::BRIGHT_BLACK.self::VERTICAL.Ansi::RESET;
+        $parts = [];
 
-        foreach ($widths as $i => $width) {
-            $cell    = $cells[$i] ?? '';
-            $padded  = mb_str_pad($cell, $width);
+        foreach ($widths as $index => $width) {
+            $cell = (string) ($cells[$index] ?? '');
+            $padded = $this->pad($cell, $width);
 
-            $parts[] = ' '.($header
-                    ? Ansi::combine(Ansi::BOLD, Ansi::BRIGHT_WHITE).$padded.Ansi::RESET
-                    : $padded
-                ).' ';
+            $content = match (true) {
+                $header => Ansi::combine(Ansi::BOLD, Ansi::CYAN).$padded.Ansi::RESET,
+                $index === 0 => Ansi::BOLD.$padded.Ansi::RESET,
+                default => $padded,
+            };
+
+            $parts[] = '  '.$content.'  ';
         }
 
         return $border.implode($border, $parts).$border;
     }
 
-    /** @return list<int> */
+    /**
+     * @return list<int>
+     */
     private function columnWidths(): array
     {
-        $all = empty($this->headers)
+        $all = $this->headers === []
             ? $this->rows
             : [$this->headers, ...$this->rows];
 
-        $cols = empty($all) ? 0 : count($all[0]);
+        if ($all === []) {
+            return [];
+        }
+
+        $columns = max(array_map('count', $all));
+
+        if ($columns === 0) {
+            return [];
+        }
 
         return array_map(
-            static fn (int $i): int => max(
+            static fn (int $index): int => max(
                 array_map(
-                    static fn (array $row): int => mb_strlen($row[$i] ?? ''),
+                    static fn (array $row): int => mb_strlen((string) ($row[$index] ?? '')),
                     $all,
                 )
             ),
-            range(0, $cols - 1),
+            range(0, $columns - 1),
         );
+    }
+
+    private function pad(string $value, int $width): string
+    {
+        $length = mb_strlen($value);
+
+        if ($length >= $width) {
+            return $value;
+        }
+
+        return $value.str_repeat(' ', $width - $length);
     }
 }

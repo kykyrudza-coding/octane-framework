@@ -73,7 +73,7 @@ final readonly class OutputStyle
 
     public function badge(string $label, string $type = 'info'): void
     {
-        $tag = "badge-{$type}";
+        $tag = "badge-$type";
         $this->output->line(" <{$tag}> {$label} </{$tag}>");
     }
 

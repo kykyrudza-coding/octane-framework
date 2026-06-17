@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Horizon\Console\Providers;
 
 use Horizon\Console\CommandRegistry;
+use Horizon\Console\Commands\AboutCommand;
 use Horizon\Console\Commands\ListCommand;
 use Horizon\Console\Commands\VersionCommand;
 use Horizon\Console\ConsoleKernel;
@@ -31,6 +32,7 @@ class ConsoleServiceProvider extends ServiceProvider
     {
         $commands = $this->app->make(CommandRegistryContract::class);
 
+        $commands->register(AboutCommand::class);
         $commands->register(ListCommand::class);
         $commands->register(VersionCommand::class);
     }

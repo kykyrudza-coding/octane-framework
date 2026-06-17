@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Console;
 
 use Horizon\Arch\Container;
+use Horizon\Arch\Application;
 use Horizon\Console\Command;
+use Horizon\Console\Commands\AboutCommand;
 use Horizon\Console\CommandRegistry;
 use Horizon\Console\ConsoleKernel;
 use Horizon\Console\Input\ConsoleInput;
@@ -173,6 +175,21 @@ class ConsoleTest extends TestCase
         }
 
         $this->fail('Spinner did not rethrow callback exception.');
+    }
+
+    public function test_about_command_outputs_application_framework_and_runtime(): void
+    {
+        new Application(sys_get_temp_dir());
+
+        $output = new ConsoleMemoryOutput();
+        $status = (new AboutCommand())->run(new ConsoleInput(['octane', 'about']), $output);
+
+        $this->assertSame(Command::SUCCESS, $status);
+        $this->assertStringContainsString('Application', $output->buffer);
+        $this->assertStringContainsString('Framework', $output->buffer);
+        $this->assertStringContainsString('Runtime', $output->buffer);
+        $this->assertStringNotContainsString('Paths', $output->buffer);
+        $this->assertStringContainsString('Octane', $output->buffer);
     }
 }
 
