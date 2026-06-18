@@ -22,9 +22,9 @@ class Application implements ApplicationContract
 {
     use ApplicationEnvironment, ManagesApplicationPaths;
 
-    protected static string $octaneVersion = '2.0.0';
+    protected static string $octaneVersion = '2.1.0';
 
-    protected static string $octaneKernelVersion = '0.1.0';
+    protected static string $octaneKernelVersion = '0.2.0';
 
     protected ContainerContract $container;
 

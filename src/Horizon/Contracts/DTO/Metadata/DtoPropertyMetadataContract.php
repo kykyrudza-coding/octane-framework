@@ -20,6 +20,8 @@ interface DtoPropertyMetadataContract
 
     public function getCollectionValueType(): ?string;
 
+    public function getCast(): ?string;
+
     public function hasDefaultValue(): bool;
 
     public function getDefaultValue(): mixed;
