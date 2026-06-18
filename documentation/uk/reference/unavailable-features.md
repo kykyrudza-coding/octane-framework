@@ -1,30 +1,36 @@
 # Відсутні та незавершені можливості
 
+Цей список описує поточний стан framework після додавання ORM, DTO і validation.
+
 ## Відсутні підсистеми
 
-- database connection/query builder/ORM/migrations;
-- console kernel і commands;
 - events;
-- cache;
-- logging;
+- cache store abstraction;
+- logging channel abstraction;
 - authentication/authorization;
-- validation;
 - sessions;
 - queues;
 - filesystem;
-- OpenAPI.
+- mail/notifications;
+- OpenAPI request/response validation.
 
-## Порожні або непрацюючі заготовки
+## Незавершені або обмежені частини
 
-- facades `Auth`, `Cache`, `Config`, `DB`, `Event`, `Log`, `Prism`, `Route`;
-- attributes `Cast`, `Guarded`, `Hidden`;
-- helpers `Arr`, `Date`, `Path`, `Str`, `Uuid`;
-- pagination classes;
-- value objects `Interval`, `Money`;
-- support exceptions, що не наслідують `Throwable`;
-- `ItemsList` із невиконаними methods;
-- classes `Observable`, `Singleton`, `Tappable` розміщені у namespace
-  `Traits`, але оголошені як classes, не traits.
+- route URL generator за name;
+- route constraints, optional parameters, casting і model binding;
+- automatic JSON body parsing for `Request`;
+- database-backed validation presence verifier;
+- config cache/publish commands;
+- session-backed redirects/flash data;
+- production-ready logging/reporting pipeline;
+- cache invalidation commands для Prism/DTO/Halcyon metadata;
+- full resource routing;
+- pagination integration in QueryBuilder.
 
-README верхнього рівня згадує Event System, Query Builder, Halcyon ORM,
-Validation і CLI, однак поточний source code не надає ці можливості.
+## Частково готові заготовки
+
+- деякі support helpers/value objects мають обмежений API;
+- pagination classes ще не інтегровані в QueryBuilder;
+- static helper/facade APIs не всюди використовують container binding.
+
+README верхнього рівня може згадувати roadmap можливості. Ця сторінка описує фактичний стан поточного source code.

@@ -1,28 +1,34 @@
 # `routes/web.php`
 
-Web route-файл підключається у `boot/app.php`:
+Web route file завантажується з `config/routing.php`:
 
 ```php
-->withRouting(
-    web: APP_ROOT.'/routes/web.php',
-)
+return [
+    'files' => [
+        'web' => APP_ROOT.'/routes/web.php',
+    ],
+
+    'groups' => [
+        'web' => [
+            'prefix' => '',
+            'name' => '',
+        ],
+    ],
+];
 ```
 
-Під час його виконання registrar встановлює route group `web`. Через це до
-маршрутів автоматично застосовується список `$middleware->web(...)`.
+Під час виконання цього файлу registrar встановлює route group `web`. Через це до маршрутів застосовується список middleware з `config/http.php['middleware']['web']` і built-in web middleware, увімкнений у `http.requests`.
 
 ```php
 <?php
 
-use App\Http\Controllers\HomeController;
-use Horizon\Routing\Route;
+use App\Controllers\HomeController;
+use Horizon\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index']);
 Route::post('/contact', [HomeController::class, 'contact']);
 ```
 
-Framework пропускає route-файл, якщо його не існує. Це не спричиняє винятку,
-але маршрути з нього не будуть зареєстровані.
+Якщо route file не існує, framework пропускає його без винятку.
 
-У skeleton web group має вбудований `ValidatePostSize`. Global
-`ConvertEmptyStringsToNull` також виконується для web routes.
+`boot/app.php` може явно передати `withRouting(web: ...)`; у такому разі цей шлях має пріоритет над `config/routing.php`. У стандартному skeleton маршрутні файли задаються тільки в config.

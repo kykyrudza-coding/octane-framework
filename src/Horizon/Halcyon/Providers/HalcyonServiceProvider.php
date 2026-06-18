@@ -31,7 +31,10 @@ final class HalcyonServiceProvider extends ServiceProvider
         $this->registerQueryResultMapper();
     }
 
-    public function boot(): void {}
+    public function boot(): void
+    {
+        $this->configureOrm();
+    }
 
     private function registerHalcyon(): void
     {
@@ -45,9 +48,20 @@ final class HalcyonServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             MetadataCacheContract::class,
-            fn () => new FileMetadataCache(
-                cachePath: $this->app->make('path.cache').DIRECTORY_SEPARATOR.'halcyon',
-            ),
+            function () {
+                $config = $this->app->has(ConfigRepositoryContract::class)
+                    ? $this->app->make(ConfigRepositoryContract::class)
+                    : null;
+                $path = $config instanceof ConfigRepositoryContract
+                    ? $config->get('halcyon.metadata.cache.path')
+                    : null;
+
+                return new FileMetadataCache(
+                    cachePath: is_string($path) && $path !== ''
+                        ? $path
+                        : $this->app->make('path.cache').DIRECTORY_SEPARATOR.'halcyon',
+                );
+            },
         );
     }
 
@@ -94,5 +108,87 @@ final class HalcyonServiceProvider extends ServiceProvider
                 hydrator: $this->app->make(HydratorContract::class),
             ),
         );
+    }
+
+    private function configureOrm(): void
+    {
+        if (! $this->app->has(ConfigRepositoryContract::class)) {
+            return;
+        }
+
+        $config = $this->app->make(ConfigRepositoryContract::class);
+        $halcyon = $this->app->make(OrmConfiguratorContract::class);
+
+        if (! $config instanceof ConfigRepositoryContract || ! $halcyon instanceof OrmConfiguratorContract) {
+            return;
+        }
+
+        foreach ($this->classMap($config->get('halcyon.orm.observers', [])) as $model => $classes) {
+            foreach ($classes as $observer) {
+                $halcyon->observe($model, $observer);
+            }
+        }
+
+        foreach ($this->classMap($config->get('halcyon.orm.scopes', [])) as $model => $classes) {
+            foreach ($classes as $scope) {
+                $halcyon->scope($model, $scope);
+            }
+        }
+
+        $morphMap = $config->get('halcyon.orm.morph_map', []);
+        if (! is_array($morphMap) || $morphMap === []) {
+            $morphMap = $config->get('halcyon.relations.morph_map', []);
+        }
+
+        if (is_array($morphMap)) {
+            $halcyon->morphMap($this->stringMap($morphMap));
+        }
+    }
+
+    /**
+     * @return array<class-string, list<class-string>>
+     */
+    private function classMap(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $map = [];
+
+        foreach ($value as $model => $classes) {
+            if (! is_string($model)) {
+                continue;
+            }
+
+            $classes = is_string($classes) ? [$classes] : $classes;
+
+            if (! is_array($classes)) {
+                continue;
+            }
+
+            $map[$model] = array_values(array_filter(
+                $classes,
+                static fn (mixed $class): bool => is_string($class) && $class !== '',
+            ));
+        }
+
+        return $map;
+    }
+
+    /**
+     * @return array<string, class-string>
+     */
+    private function stringMap(array $value): array
+    {
+        $map = [];
+
+        foreach ($value as $alias => $class) {
+            if (is_string($alias) && is_string($class) && $class !== '') {
+                $map[$alias] = $class;
+            }
+        }
+
+        return $map;
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Horizon\Exception\Renderers;
 
+use Horizon\Arch\Application;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Contracts\Exception\Renderers\ErrorRendererContract;
 use Throwable;
 
@@ -21,6 +23,20 @@ class ErrorRenderer implements ErrorRendererContract
 
     protected function renderer(): ErrorRendererContract
     {
+        $renderer = $this->config('exceptions.rendering.default', 'auto');
+
+        if ($renderer === 'json') {
+            return new JsonErrorRenderer;
+        }
+
+        if ($renderer === 'html') {
+            return new HtmlErrorRenderer;
+        }
+
+        if ($renderer === 'console') {
+            return new ConsoleErrorRenderer;
+        }
+
         if (PHP_SAPI === 'cli') {
             return new ConsoleErrorRenderer;
         }
@@ -30,6 +46,21 @@ class ErrorRenderer implements ErrorRendererContract
         }
 
         return new HtmlErrorRenderer;
+    }
+
+    private function config(string $key, mixed $default = null): mixed
+    {
+        try {
+            $config = Application::getInstance()->make(ConfigRepositoryContract::class);
+
+            if ($config instanceof ConfigRepositoryContract) {
+                return $config->get($key, $default);
+            }
+        } catch (Throwable) {
+            //
+        }
+
+        return $default;
     }
 
     protected function expectsJson(): bool

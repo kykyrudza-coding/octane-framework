@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Horizon\Docs\Controllers;
 
 use Horizon\Arch\Application;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Http\Response\Response;
 
 final class ApiDocsController
@@ -23,7 +24,10 @@ final class ApiDocsController
         }
 
         $app = Application::getInstance();
-        $base = $app->varPath('framework/api-docs');
+        $base = $this->config('docs.api.output', $app->varPath('framework/api-docs'));
+        $base = is_string($base) && $base !== ''
+            ? $base
+            : $app->varPath('framework/api-docs');
         $baseRealPath = realpath($base);
 
         if ($baseRealPath === false) {
@@ -70,5 +74,26 @@ final class ApiDocsController
             'webp' => 'image/webp',
             default => 'text/html; charset=UTF-8',
         };
+    }
+
+    private function config(string $key, mixed $default = null): mixed
+    {
+        try {
+            $app = Application::getInstance();
+
+            if (! $app->has(ConfigRepositoryContract::class)) {
+                return $default;
+            }
+
+            $config = $app->make(ConfigRepositoryContract::class);
+        } catch (\Throwable) {
+            return $default;
+        }
+
+        if (! $config instanceof ConfigRepositoryContract) {
+            return $default;
+        }
+
+        return $config->get($key, $default);
     }
 }

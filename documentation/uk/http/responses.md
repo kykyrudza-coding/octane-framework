@@ -1,6 +1,6 @@
 # HTTP-відповіді
 
-## Звичайна response
+Звичайна response:
 
 ```php
 return response('Created', 201, [
@@ -24,8 +24,7 @@ return response()->view('users.show', ['user' => $user]);
 return redirect('/dashboard', 302);
 ```
 
-`Response` за замовчуванням має `Content-Type: text/html; charset=UTF-8`.
-Header names нормалізуються, наприклад `x-request-id` стає `X-Request-Id`.
+`Response` за замовчуванням має `Content-Type: text/html; charset=UTF-8`. Header names нормалізуються, наприклад `x-request-id` стає `X-Request-Id`.
 
 Response modifiers immutable:
 
@@ -36,8 +35,14 @@ $response = response('OK')
     ->withHeaders(['Cache-Control' => 'no-store']);
 ```
 
-`JsonResponse` кодує data лише під час `send()`. До цього `getBody()` буде
-порожнім. Помилка `json_encode()` перетворюється на `RuntimeException`.
+`JsonResponse` кодує data під час `send()`. JSON flags беруться з `config/http.php`:
 
-`RedirectResponse::setTargetUrl()` повертає clone із новим `Location`.
-Session flash API для redirects ще відсутній.
+```php
+'responses' => [
+    'json_flags' => JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+],
+```
+
+Помилка `json_encode()` перетворюється на `ResponseEncodingException`.
+
+`RedirectResponse::setTargetUrl()` повертає clone із новим `Location`. Session flash API для redirects ще відсутній.

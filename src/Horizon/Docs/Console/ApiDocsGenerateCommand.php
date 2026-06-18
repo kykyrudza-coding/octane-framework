@@ -7,12 +7,13 @@ namespace Horizon\Docs\Console;
 use FilesystemIterator;
 use Horizon\Arch\Application;
 use Horizon\Console\Command;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Contracts\Console\Input\ConsoleInputContract;
 use Horizon\Contracts\Console\Output\ConsoleOutputContract;
 use Horizon\Docs\ApiDocGenerator;
-use ReflectionClass;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use Throwable;
 
 final class ApiDocsGenerateCommand extends Command
@@ -32,8 +33,9 @@ final class ApiDocsGenerateCommand extends Command
         ConsoleOutputContract $output,
     ): int {
         $app = Application::getInstance();
-        $source = $input->argument(2, $this->frameworkSourcePath());
-        $target = $input->argument(3, $app->varPath('framework/api-docs'));
+        $source = $input->argument(2, $this->config('docs.api.source', $this->frameworkSourcePath()));
+        $source = $source ?: $this->frameworkSourcePath();
+        $target = $input->argument(3, $this->config('docs.api.output', $app->varPath('framework/api-docs')));
 
         if (! is_string($source) || ! is_string($target)) {
             $this->style->error('Invalid source or target path.');
@@ -152,5 +154,22 @@ final class ApiDocsGenerateCommand extends Command
     private function pause(int $microseconds): void
     {
         usleep($microseconds);
+    }
+
+    private function config(string $key, mixed $default = null): mixed
+    {
+        $app = Application::getInstance();
+
+        if (! $app->has(ConfigRepositoryContract::class)) {
+            return $default;
+        }
+
+        $config = $app->make(ConfigRepositoryContract::class);
+
+        if (! $config instanceof ConfigRepositoryContract) {
+            return $default;
+        }
+
+        return $config->get($key, $default);
     }
 }

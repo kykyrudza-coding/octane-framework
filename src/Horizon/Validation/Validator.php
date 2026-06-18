@@ -43,6 +43,9 @@ final class Validator implements ValidatorContract
         private readonly array $rules,
         private readonly ?PresenceVerifierContract $presenceVerifier = null,
         private readonly ?DtoFactoryContract $dtoFactory = null,
+        private readonly bool $stopOnFirstFailure = false,
+        private readonly array $messages = [],
+        private readonly array $attributes = [],
     ) {
         $this->errors = new ValidationErrorBag;
     }
@@ -111,7 +114,9 @@ final class Validator implements ValidatorContract
             }
 
             if ($required !== null && (! $present || $this->empty($value))) {
-                $this->errors->add($attribute, $this->message($required, $attribute));
+                if ($this->fail($validated, $required, $attribute)) {
+                    return;
+                }
 
                 continue;
             }
@@ -130,7 +135,10 @@ final class Validator implements ValidatorContract
 
             foreach ($definitions as $rule) {
                 if (! $this->passesRule($rule, $attribute, $value, $present)) {
-                    $this->errors->add($attribute, $this->message($rule, $attribute));
+                    if ($this->fail($validated, $rule, $attribute)) {
+                        return;
+                    }
+
                     $failed = true;
 
                 }
@@ -143,6 +151,23 @@ final class Validator implements ValidatorContract
 
         $this->validated = new ValidatedData($validated, $this->dtoFactory);
         $this->evaluated = true;
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function fail(array $validated, RuleDefinitionContract $rule, string $attribute): bool
+    {
+        $this->errors->add($attribute, $this->message($rule, $attribute));
+
+        if (! $this->stopOnFirstFailure) {
+            return false;
+        }
+
+        $this->validated = new ValidatedData($validated, $this->dtoFactory);
+        $this->evaluated = true;
+
+        return true;
     }
 
     /**
@@ -255,6 +280,15 @@ final class Validator implements ValidatorContract
 
     private function message(RuleDefinitionContract $rule, string $attribute): string
     {
+        $ruleName = $this->ruleName($rule);
+        $message = $this->messages[$attribute.'.'.$ruleName]
+            ?? $this->messages[$ruleName]
+            ?? null;
+
+        if (is_string($message) && $message !== '') {
+            return str_replace(':attribute', $this->displayAttribute($attribute), $message);
+        }
+
         if ($rule->message() !== null) {
             return $rule->message();
         }
@@ -268,16 +302,43 @@ final class Validator implements ValidatorContract
             }
         }
 
+        $display = $this->displayAttribute($attribute);
+
         return match (true) {
-            $rule instanceof RequiredRule => "The $attribute field is required.",
-            $rule instanceof TypeRule => "The $attribute field must be {$rule->parameters()['type']}.",
-            $rule instanceof EmailRule => "The $attribute field must be a valid email address.",
-            $rule instanceof MinRule => "The $attribute field must be at least {$rule->parameters()['min']}.",
-            $rule instanceof MaxRule => "The $attribute field must not be greater than {$rule->parameters()['max']}.",
-            $rule instanceof BetweenRule => "The $attribute field must be between {$rule->parameters()['min']} and {$rule->parameters()['max']}.",
-            $rule instanceof SameRule => "The $attribute field must match {$rule->parameters()['field']}.",
-            $rule instanceof ExistsRule => "The selected $attribute is invalid.",
-            default => "The $attribute field is invalid.",
+            $rule instanceof RequiredRule => "The $display field is required.",
+            $rule instanceof TypeRule => "The $display field must be {$rule->parameters()['type']}.",
+            $rule instanceof EmailRule => "The $display field must be a valid email address.",
+            $rule instanceof MinRule => "The $display field must be at least {$rule->parameters()['min']}.",
+            $rule instanceof MaxRule => "The $display field must not be greater than {$rule->parameters()['max']}.",
+            $rule instanceof BetweenRule => "The $display field must be between {$rule->parameters()['min']} and {$rule->parameters()['max']}.",
+            $rule instanceof SameRule => "The $display field must match {$rule->parameters()['field']}.",
+            $rule instanceof ExistsRule => "The selected $display is invalid.",
+            default => "The $display field is invalid.",
+        };
+    }
+
+    private function displayAttribute(string $attribute): string
+    {
+        $display = $this->attributes[$attribute] ?? null;
+
+        return is_string($display) && $display !== '' ? $display : $attribute;
+    }
+
+    private function ruleName(RuleDefinitionContract $rule): string
+    {
+        return match (true) {
+            $rule instanceof RequiredRule => 'required',
+            $rule instanceof OptionalRule => 'optional',
+            $rule instanceof NullableRule => 'nullable',
+            $rule instanceof TypeRule => (string) $rule->parameters()['type'],
+            $rule instanceof EmailRule => 'email',
+            $rule instanceof MinRule => 'min',
+            $rule instanceof MaxRule => 'max',
+            $rule instanceof BetweenRule => 'between',
+            $rule instanceof SameRule => 'same',
+            $rule instanceof ExistsRule => 'exists',
+            $rule instanceof CustomRule => 'custom',
+            default => 'invalid',
         };
     }
 

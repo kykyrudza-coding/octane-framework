@@ -6,7 +6,9 @@ namespace Horizon\Http\Request;
 
 use Horizon\Contracts\Http\Request\RequestContract;
 use Horizon\Contracts\Validation\ValidatedDataContract;
+use Horizon\Contracts\Validation\ValidatorFactoryContract;
 use Horizon\Validation\ValidatorFactory;
+use Throwable;
 
 class Request implements RequestContract
 {
@@ -140,9 +142,24 @@ class Request implements RequestContract
 
     public function validate(array $rules): ValidatedDataContract
     {
-        return (new ValidatorFactory)
+        return $this->validatorFactory()
             ->make($this->all(), $rules)
             ->validate();
+    }
+
+    private function validatorFactory(): ValidatorFactoryContract
+    {
+        try {
+            $factory = \app(ValidatorFactoryContract::class);
+
+            if ($factory instanceof ValidatorFactoryContract) {
+                return $factory;
+            }
+        } catch (Throwable) {
+            //
+        }
+
+        return new ValidatorFactory;
     }
 
     /**

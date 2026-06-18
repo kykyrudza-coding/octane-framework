@@ -25,6 +25,9 @@ class DtoMapper implements DtoMapperContract
 
     public function __construct(
         ?DtoMetadataRepositoryContract $metadata = null,
+        private readonly bool $strict = true,
+        private readonly string $unknownFields = 'ignore',
+        private readonly string $missingFields = 'throw',
     ) {
         $this->metadata = $metadata ?? new DtoMetadataRepository;
     }
@@ -35,6 +38,8 @@ class DtoMapper implements DtoMapperContract
     public function map(DtoMetadataContract $metadata, array|object $data): DtoContract
     {
         $values = $this->normalizeData($data);
+        $this->guardUnknownFields($metadata, $values);
+
         $arguments = [];
 
         foreach ($metadata->getConstructorParameters() as $property) {
@@ -82,7 +87,8 @@ class DtoMapper implements DtoMapperContract
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
+     *
      * @throws ReflectionException
      */
     private function resolveValue(DtoPropertyMetadataContract $property, array $data): mixed
@@ -99,6 +105,10 @@ class DtoMapper implements DtoMapperContract
         }
 
         if ($property->isNullable()) {
+            return null;
+        }
+
+        if (! $this->strict || $this->missingFields === 'null') {
             return null;
         }
 
@@ -177,7 +187,8 @@ class DtoMapper implements DtoMapperContract
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
+     *
      * @throws ReflectionException
      */
     private function fillPublicProperties(DtoContract $dto, DtoMetadataContract $metadata, array $data): void
@@ -307,5 +318,32 @@ class DtoMapper implements DtoMapperContract
     private function metadata(): DtoMetadataRepositoryContract
     {
         return $this->metadata;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function guardUnknownFields(DtoMetadataContract $metadata, array $data): void
+    {
+        if (! $this->strict || $this->unknownFields !== 'throw') {
+            return;
+        }
+
+        $known = [];
+
+        foreach ($metadata->getProperties() as $property) {
+            $inputName = $property->getInputName();
+            $known[] = $inputName;
+
+            if (str_contains($inputName, '.')) {
+                $known[] = explode('.', $inputName, 2)[0];
+            }
+        }
+
+        foreach (array_keys($data) as $key) {
+            if (! in_array($key, $known, true)) {
+                throw new DtoMappingException("Unknown DTO field [$key].");
+            }
+        }
     }
 }

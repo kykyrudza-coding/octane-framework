@@ -13,9 +13,15 @@ class SupportServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(HasherContract::class, function () {
-            return match(config('hashing.driver', 'bcrypt')) {
-                'argon2' => new Argon2Hasher(),
-                default  => new BcryptHasher(),
+            return match (config('hashing.driver', 'bcrypt')) {
+                'argon2' => new Argon2Hasher(
+                    memory: (int) config('hashing.argon2.memory', 65536),
+                    time: (int) config('hashing.argon2.time', 4),
+                    threads: (int) config('hashing.argon2.threads', 1),
+                ),
+                default => new BcryptHasher(
+                    rounds: (int) config('hashing.bcrypt.rounds', 10),
+                ),
             };
         });
     }

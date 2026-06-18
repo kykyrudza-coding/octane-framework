@@ -1,11 +1,15 @@
 # Prism views і дані
 
-Views за замовчуванням знаходяться у `ui/views`. Пошук виконується в такому
-порядку:
+Views за замовчуванням знаходяться в `ui/views`. Шлях і extensions задаються в `config/prism.php`:
 
-1. `.prism.php`;
-2. `.php`;
-3. `.html`.
+```php
+return [
+    'views' => [
+        'path' => APP_ROOT.'/ui/views',
+        'extensions' => ['.prism.php', '.php', '.html'],
+    ],
+];
+```
 
 Dot notation відповідає вкладеним каталогам:
 
@@ -19,15 +23,13 @@ return view('users.profile', [
 ui/views/users/profile.prism.php
 ```
 
-`view()` повертає вже rendered `RenderedView`, який є `Stringable`.
-Тому всі local data потрібно передавати одразу:
+`view()` повертає вже rendered `RenderedView`, який є `Stringable`. Тому local data треба передавати одразу:
 
 ```php
 return view('dashboard', ['stats' => $stats]);
 ```
 
-Виклик `view('dashboard')->with(...)` у поточній реалізації не змінить
-результат: `RenderedView::with()` є no-op.
+Виклик `view('dashboard')->with(...)` у поточній реалізації не змінить результат: `RenderedView::with()` є no-op.
 
 Global shared data:
 
@@ -38,8 +40,22 @@ $prism = app(PrismContract::class);
 $prism->share('appName', config('app.name'));
 ```
 
-Local data перезаписує shared key з тим самим ім'ям. Перевірити існування:
+Local data перезаписує shared key з тим самим іменем. Перевірити існування:
 
 ```php
 $prism->exists('users.profile');
+```
+
+Компоненти й directives можна реєструвати через `config/prism.php`:
+
+```php
+'components' => [
+    'aliases' => [
+        'Button' => App\View\Components\Button::class,
+    ],
+],
+
+'directives' => [
+    'money' => App\View\Directives\MoneyDirective::class,
+],
 ```

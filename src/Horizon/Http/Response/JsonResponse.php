@@ -14,8 +14,12 @@ class JsonResponse extends Response
     /**
      * @param  array<string, scalar|null>  $headers
      */
-    public function __construct(mixed $data = null, int $statusCode = 200, array $headers = [])
-    {
+    public function __construct(
+        mixed $data = null,
+        int $statusCode = 200,
+        array $headers = [],
+        private readonly int $jsonFlags = JSON_THROW_ON_ERROR,
+    ) {
         $this->data = $data;
 
         $headers = array_merge($headers, [
@@ -42,7 +46,7 @@ class JsonResponse extends Response
     {
         try {
 
-            $this->body = json_encode($this->data, JSON_THROW_ON_ERROR);
+            $this->body = json_encode($this->data, $this->jsonFlags | JSON_THROW_ON_ERROR);
 
         } catch (JsonException $e) {
             throw new ResponseEncodingException('Failed to encode JSON response: '.$e->getMessage(), $e);

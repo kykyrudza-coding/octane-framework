@@ -20,7 +20,7 @@ class ConfigRepository implements ConfigRepositoryContract
         $value = $this->items;
 
         foreach ($keys as $key) {
-            if (is_array($value) && isset($value[$key])) {
+            if (is_array($value) && array_key_exists($key, $value)) {
                 $value = $value[$key];
             } else {
                 return $default;
@@ -37,7 +37,7 @@ class ConfigRepository implements ConfigRepositoryContract
 
     public function has(string $key): bool
     {
-        return isset($this->items[$key]);
+        return array_key_exists($key, $this->items);
     }
 
     /**

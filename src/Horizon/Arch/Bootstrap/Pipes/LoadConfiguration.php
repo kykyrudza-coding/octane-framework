@@ -38,6 +38,11 @@ class LoadConfiguration implements PipeInterface
             $repository
         );
 
+        $timezone = $repository->get('app.timezone', 'UTC');
+        if (is_string($timezone) && $timezone !== '') {
+            date_default_timezone_set($timezone);
+        }
+
         return $next($payload);
     }
 }

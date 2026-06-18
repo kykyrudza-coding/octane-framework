@@ -1,34 +1,87 @@
-# Database: поточний стан
+# Database
 
-У поточному `octane-framework` немає реалізації:
+Database package містить connection manager, connection factory, PDO-backed drivers, schema builder, migrations і seeding commands.
 
-- database connection manager;
-- query builder;
-- ORM;
-- migrations runner;
-- schema builder;
-- transactions;
-- working `DB` facade.
-
-`octane-application/config/database.php` є лише configuration-заготовкою, а
-`db/Core/0000_00_00_create_session_table.php` не містить migration code.
-Клас `Horizon\Support\Facades\DB` порожній.
-
-Тому приклади на кшталт `DB::table('users')->get()` для цієї версії
-некоректні.
-
-До появи database component застосунок може:
-
-1. зареєструвати PDO або сторонній database client у service provider;
-2. створити власні repository classes;
-3. inject-ити repository contracts у controllers/services через container.
+`config/database.php`:
 
 ```php
-$this->app->singleton(PDO::class, function () {
-    return new PDO(
-        env('DB_DSN'),
-        env('DB_USERNAME'),
-        env('DB_PASSWORD'),
-    );
-});
+return [
+    'default_connection' => env('DB_CONNECTION', 'mysql'),
+
+    'connections' => [
+        'mysql' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => (int) env('DB_PORT', 3306),
+            'database' => env('DB_NAME', 'octane'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'options' => [],
+        ],
+
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => (int) env('DB_PORT', 5432),
+            'database' => env('DB_NAME', 'octane'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'schema' => 'public',
+            'options' => [],
+        ],
+
+        'sqlite' => [
+            'driver' => 'sqlite',
+            'database' => env('DB_NAME', 'database.sqlite'),
+            'options' => [],
+        ],
+    ],
+
+    'query_log' => [
+        'enabled' => (bool) env('DB_QUERY_LOG', false),
+        'slow_threshold' => (int) env('DB_QUERY_LOG_SLOW_MS', 100),
+    ],
+];
 ```
+
+Активні keys:
+
+- `default_connection`;
+- `connections.*`;
+- `query_log.enabled`.
+
+`query_log.slow_threshold` збережений як application setting, але поточний `Connection` тільки записує `time_ms` для кожного query і не фільтрує slow queries.
+
+## Connections
+
+```php
+use Horizon\Contracts\Database\Connections\ConnectionManagerContract;
+
+$manager = app(ConnectionManagerContract::class);
+$connection = $manager->connection();
+
+$rows = $connection->select('select * from users where active = ?', [1]);
+```
+
+Підтримані drivers:
+
+- `mysql`;
+- `pgsql`;
+- `sqlite`.
+
+SQLite database path може бути абсолютним, `:memory:` або відносним до application database path.
+
+## Migrations
+
+Database provider реєструє console commands:
+
+- `migrate`;
+- `migrate:rollback`;
+- `migrate:fresh`;
+- `migrate:reset`;
+- `make:migration`;
+- `db:seed`.
+
+Schema builder має компілятори для MySQL, PostgreSQL і SQLite.

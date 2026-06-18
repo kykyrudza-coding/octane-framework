@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Horizon\Prism;
 
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
 use Horizon\Contracts\Prism\Prism\Engine\PrismEngineContract;
 use Horizon\Contracts\Prism\ViewContract;
 use Horizon\Contracts\Prism\ViewFactoryContract;
-use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
 use Horizon\Prism\Exceptions\ViewNotFoundException;
 
 final class ViewFactory implements ViewFactoryContract
@@ -23,10 +23,20 @@ final class ViewFactory implements ViewFactoryContract
     private array $extensions = ['.prism.php', '.php', '.html'];
 
     public function __construct(
-        private readonly PrismCompilerContract      $compiler,
+        private readonly PrismCompilerContract $compiler,
         private readonly PrismEngineContract $engine,
-        private readonly string             $viewsPath,
-    ) {}
+        private readonly string $viewsPath,
+        array $extensions = ['.prism.php', '.php', '.html'],
+    ) {
+        $this->extensions = array_values(array_filter(
+            $extensions,
+            static fn (mixed $extension): bool => is_string($extension) && $extension !== '',
+        ));
+
+        if ($this->extensions === []) {
+            $this->extensions = ['.prism.php', '.php', '.html'];
+        }
+    }
 
     public function make(string $view, array $data = []): ViewContract
     {
@@ -46,6 +56,7 @@ final class ViewFactory implements ViewFactoryContract
     {
         try {
             $this->resolvePath($view);
+
             return true;
         } catch (ViewNotFoundException) {
             return false;
@@ -76,10 +87,10 @@ final class ViewFactory implements ViewFactoryContract
     private function resolvePath(string $view): string
     {
         $relative = str_replace('.', DIRECTORY_SEPARATOR, $view);
-        $base     = rtrim($this->viewsPath, '/\\');
+        $base = rtrim($this->viewsPath, '/\\');
 
         foreach ($this->extensions as $ext) {
-            $path = $base . DIRECTORY_SEPARATOR . $relative . $ext;
+            $path = $base.DIRECTORY_SEPARATOR.$relative.$ext;
             if (file_exists($path)) {
                 return $path;
             }

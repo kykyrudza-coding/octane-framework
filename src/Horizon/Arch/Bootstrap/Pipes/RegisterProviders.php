@@ -7,6 +7,7 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
 use Horizon\Arch\Exceptions\BootstrapException;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
 use Horizon\Support\Pipeline\PipeInterface;
 
@@ -39,6 +40,10 @@ class RegisterProviders implements PipeInterface
     {
         $providers = $payload->getProviders();
 
+        if ($providers === [] || $providers === '') {
+            $providers = $this->configuredProviderListFromConfig($payload);
+        }
+
         if (is_string($providers)) {
             $providers = require $providers;
         }
@@ -48,6 +53,22 @@ class RegisterProviders implements PipeInterface
         }
 
         return $this->filterProviderClasses($providers);
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function configuredProviderListFromConfig(ApplicationBuilder $payload): array
+    {
+        $config = $payload->app->make(ConfigRepositoryContract::class);
+
+        if (! $config instanceof ConfigRepositoryContract) {
+            return [];
+        }
+
+        $providers = $config->get('app.providers', []);
+
+        return is_array($providers) ? $providers : [];
     }
 
     /**

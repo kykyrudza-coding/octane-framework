@@ -12,6 +12,10 @@ use Horizon\Contracts\Prism\ViewFactoryContract;
 
 class ResponseFactory implements ResponseFactoryContract
 {
+    public function __construct(
+        private readonly int $jsonFlags = JSON_THROW_ON_ERROR,
+    ) {}
+
     /**
      * @param  array<string, scalar|null>  $headers
      */
@@ -33,7 +37,7 @@ class ResponseFactory implements ResponseFactoryContract
      */
     public function json(mixed $data = null, int $status = 200, array $headers = []): ResponseContract
     {
-        return new JsonResponse($data, $status, $headers);
+        return new JsonResponse($data, $status, $headers, $this->jsonFlags);
     }
 
     /**
@@ -53,7 +57,7 @@ class ResponseFactory implements ResponseFactoryContract
     }
 
     /**
-     * @param  array<string, mixed>        $data
+     * @param  array<string, mixed>  $data
      * @param  array<string, scalar|null>  $headers
      */
     public function view(string $view, array $data = [], int $status = 200, array $headers = []): ResponseContract

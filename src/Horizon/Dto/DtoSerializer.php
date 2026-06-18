@@ -21,6 +21,7 @@ class DtoSerializer implements DtoSerializerContract
 
     public function __construct(
         ?DtoMetadataRepositoryContract $metadata = null,
+        private readonly bool $includeNull = true,
     ) {
         $this->metadata = $metadata ?? new DtoMetadataRepository;
     }
@@ -56,10 +57,16 @@ class DtoSerializer implements DtoSerializerContract
                 continue;
             }
 
-            $result[$property->getOutputName()] = $this->serializeValue(
+            $value = $this->serializeValue(
                 $property->getCast(),
                 $reflectionProperty->getValue($dto),
             );
+
+            if ($value === null && ! $this->includeNull) {
+                continue;
+            }
+
+            $result[$property->getOutputName()] = $value;
         }
 
         return $result;

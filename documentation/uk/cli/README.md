@@ -1,31 +1,85 @@
-# CLI: поточний стан
+# CLI
 
-Framework не містить namespace `Horizon\Console`, command registry або console
-kernel.
-
-Файл `octane` у skeleton намагається створити:
+Skeleton має executable entrypoint `octane`:
 
 ```php
-$app = new Kernel\Console\App();
+#!/usr/bin/env php
+<?php
+
+define('APP_ROOT', __DIR__);
+define('OCTANE_START', microtime(true));
+
+require_once APP_ROOT.'/vendor/autoload.php';
+
+$app = require_once APP_ROOT.'/boot/app.php';
+
+exit($app->runCli($argv));
 ```
 
-Такого class немає ні в `octane-framework`, ні в `octane-application`.
-Отже команди:
+Console kernel і command registry реєструються framework providers. Built-in commands:
 
 ```bash
-php octane
 php octane list
-php octane serve
+php octane about
+php octane start
+php octane docs:api
+php octane migrate
+php octane migrate:rollback
+php octane migrate:fresh
+php octane migrate:reset
+php octane make:migration
+php octane db:seed
 ```
 
-у поточному стані не є підтримуваним API.
+`start` читає defaults з `config/http.php`:
 
-Для локального HTTP server використовуйте:
+```php
+'server' => [
+    'host' => env('SERVER_HOST', '127.0.0.1'),
+    'port' => (int) env('SERVER_PORT', 8000),
+],
+```
+
+Command line arguments мають пріоритет:
 
 ```bash
-php -S 127.0.0.1:8000 -t public
+php octane start 127.0.0.1 8080
 ```
 
-Для власних scripts можна створити окремий PHP entry point, підключити
-`vendor/autoload.php` та `boot/app.php`, але це буде application-specific
-рішення, не вбудована command system.
+## Application commands
+
+Application command classes додаються через `config/console.php`:
+
+```php
+return [
+    'commands' => [
+        App\Console\Commands\ImportUsersCommand::class,
+    ],
+];
+```
+
+Command class має реалізовувати `CommandContract`, зазвичай через базовий `Horizon\Console\Command`:
+
+```php
+final class ImportUsersCommand extends Command
+{
+    public static function commandName(): string
+    {
+        return 'users:import';
+    }
+
+    public function description(): string
+    {
+        return 'Import users.';
+    }
+
+    public function handle($input, $output): int
+    {
+        $output->line('Imported.');
+
+        return self::SUCCESS;
+    }
+}
+```
+
+Некоректні command classes з config не реєструються.

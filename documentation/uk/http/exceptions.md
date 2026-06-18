@@ -1,38 +1,56 @@
 # Обробка винятків
 
-Exception handler реєструється ще до завантаження `.env` і перехоплює
-uncaught exceptions через Symfony ErrorHandler.
+Exception handler реєструється на ранній bootstrap-фазі й перехоплює uncaught exceptions через Symfony ErrorHandler.
 
 ```php
 abort(404, 'Post not found.');
 abort(403, 'Forbidden', ['X-Reason' => 'policy']);
 ```
 
-`abort()` кидає `HttpException`. Status береться з `getStatusCode()` або з
-exception code у діапазоні 400-599.
+`abort()` кидає `HttpException`. Status береться з `getStatusCode()` або з exception code у діапазоні 400-599.
 
-Renderer вибирається так:
+Після завантаження config handler читає `config/exceptions.php`:
+
+```php
+return [
+    'debug' => (bool) env('APP_DEBUG', false),
+
+    'reporting' => [
+        'ignore' => [
+            // DomainException::class,
+        ],
+    ],
+
+    'rendering' => [
+        'default' => 'auto', // auto, html, json, console
+        'json' => [
+            'pretty' => false,
+        ],
+        'views' => [
+            'path' => null,
+        ],
+    ],
+];
+```
+
+Renderer у режимі `auto` вибирається так:
 
 - CLI: plain text;
 - `Accept: application/json`, JSON `Content-Type` або XMLHttpRequest: JSON;
 - інші HTTP-запити: HTML.
 
-`APP_DEBUG=true` додає class, message, file, line і stack trace. У production
-JSON повертає узагальнені `ServerError` / `Something went wrong.`, а HTML
-приховує технічні деталі.
+`APP_DEBUG=true` додає class, message, file, line і stack trace. У production JSON повертає узагальнені `ServerError` / `Something went wrong.`, а HTML приховує технічні деталі.
 
-Custom production error view шукається у:
+Custom production error view шукається в `exceptions.rendering.views.path`, якщо шлях задано. Інакше використовується:
 
 ```text
 resources/views/errors/{status}.php
 ```
 
-Це звичайний PHP-файл, не Prism view. Framework має fallback views для 403,
-404, 500 і 503 та детальний inspector для server errors у debug mode.
+Це звичайний PHP-файл, не Prism view. Framework має fallback views для 403, 404, 500 і 503 та детальний inspector для server errors у debug mode.
 
 Поточні обмеження:
 
-- `HttpException::getHeaders()` handler не додає до response;
-- `report()` завжди використовує `error_log()`;
-- `withExceptions()` передає handler, але окремого API callback-ів для
-  report/render у ньому поки немає.
+- headers з `HttpException::getHeaders()` handler ще не додає до response;
+- `report()` використовує `error_log()`;
+- окремого API для report/render callbacks поки немає.

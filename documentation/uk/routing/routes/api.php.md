@@ -1,37 +1,33 @@
 # `routes/api.php`
 
-Щоб API routes реально завантажувались, передайте файл окремим аргументом:
+API route file завантажується з `config/routing.php`:
 
 ```php
-->withRouting(
-    web: APP_ROOT.'/routes/web.php',
-    api: APP_ROOT.'/routes/api.php',
-)
+return [
+    'files' => [
+        'api' => APP_ROOT.'/routes/api.php',
+    ],
+
+    'groups' => [
+        'api' => [
+            'prefix' => 'api',
+            'name' => 'api.',
+        ],
+    ],
+];
 ```
 
-Поточний skeleton має `routes/api.php`, але у `boot/app.php` передає лише
-`web`. Отже API-файл за замовчуванням не виконується.
-
-Приклад:
+Груповий prefix `api` означає, що маршрут `/users` у `routes/api.php` стане `/api/users`:
 
 ```php
 <?php
 
-use Horizon\Routing\Route;
+use App\Controllers\UserController;
+use Horizon\Support\Facades\Route;
 
-Route::get('/api/health', function () {
-    return response()->json(['status' => 'ok']);
-});
+Route::get('/users', [UserController::class, 'index']);
 ```
 
-Framework не додає `/api` автоматично. Prefix треба записати у URI або
-створити group:
+API middleware береться з `config/http.php['middleware']['api']`.
 
-```php
-Route::prefix('/api')->group(function ($routes) {
-    $routes->get('/users', [UserController::class, 'index']);
-});
-```
-
-API group визначає тільки вибір `$middleware->api(...)`. Автоматичні JSON
-responses, rate limiting, authentication чи OpenAPI generation відсутні.
+Автоматичні JSON responses, rate limiting, authentication чи OpenAPI validation не додаються самі. Їх треба підключати middleware або controller code.

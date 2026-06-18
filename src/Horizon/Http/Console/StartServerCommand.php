@@ -6,12 +6,14 @@ namespace Horizon\Http\Console;
 
 use Horizon\Console\Command;
 use Horizon\Contracts\Arch\ApplicationContract;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Contracts\Console\Input\ConsoleInputContract;
 use Horizon\Contracts\Console\Output\ConsoleOutputContract;
 
 final class StartServerCommand extends Command
 {
     private const string DEFAULT_HOST = '127.0.0.1';
+
     private const int DEFAULT_PORT = 8000;
 
     public function __construct(
@@ -32,19 +34,20 @@ final class StartServerCommand extends Command
         ConsoleInputContract $input,
         ConsoleOutputContract $output,
     ): int {
-        $host    = $input->argument(2, self::DEFAULT_HOST);
-        $port    = (int) $input->argument(3, self::DEFAULT_PORT);
+        $host = $input->argument(2, $this->config('http.server.host', self::DEFAULT_HOST));
+        $port = (int) $input->argument(3, $this->config('http.server.port', self::DEFAULT_PORT));
         $docroot = $this->app->basePath('public');
 
         if (! is_dir($docroot)) {
             $this->style->error("Document root not found: $docroot");
+
             return self::FAILURE;
         }
 
         $this->style->title('Octane Development Server');
-        $this->style->keyValue('URL',  "http://$host:$port");
+        $this->style->keyValue('URL', "http://$host:$port");
         $this->style->keyValue('Root', $docroot);
-        $this->style->keyValue('PHP',  PHP_VERSION);
+        $this->style->keyValue('PHP', PHP_VERSION);
         $this->style->info('Press Ctrl+C to stop the server.');
         $this->style->newLine();
 
@@ -68,6 +71,7 @@ final class StartServerCommand extends Command
 
         if (! is_resource($process)) {
             $this->style->error('Failed to start server process.');
+
             return self::FAILURE;
         }
 
@@ -113,17 +117,19 @@ final class StartServerCommand extends Command
 
         if (str_contains($line, 'Development Server') && str_contains($line, 'started')) {
             $this->style->success('Server started successfully.');
+
             return;
         }
 
         if (preg_match('/\[(.+?)\] ([\d.]+:\d+) \[(\d+)\]: (\w+) (.+)/', $line, $m)) {
             [, $datetime, $remote, $status, $method, $path] = $m;
 
-            $time       = date('H:i:s', strtotime($datetime));
-            $statusTag  = $this->statusTag((int) $status);
-            $methodTag  = "<info>{$method}</info>";
+            $time = date('H:i:s', strtotime($datetime));
+            $statusTag = $this->statusTag((int) $status);
+            $methodTag = "<info>{$method}</info>";
 
             $output->line("  <dim>{$time}</dim>  {$statusTag}  {$methodTag} <bold>{$path}</bold>  <dim>{$remote}</dim>");
+
             return;
         }
 
@@ -133,6 +139,7 @@ final class StartServerCommand extends Command
 
         if (str_contains($line, 'PHP Fatal') || str_contains($line, 'PHP Warning') || str_contains($line, 'PHP Notice')) {
             $this->style->error($line);
+
             return;
         }
 
@@ -145,7 +152,18 @@ final class StartServerCommand extends Command
             $status >= 500 => "<error> {$status} </error>",
             $status >= 400 => "<warning> {$status} </warning>",
             $status >= 300 => "<info> {$status} </info>",
-            default        => "<success> {$status} </success>",
+            default => "<success> {$status} </success>",
         };
+    }
+
+    private function config(string $key, mixed $default = null): mixed
+    {
+        $config = $this->app->make(ConfigRepositoryContract::class);
+
+        if (! $config instanceof ConfigRepositoryContract) {
+            return $default;
+        }
+
+        return $config->get($key, $default);
     }
 }

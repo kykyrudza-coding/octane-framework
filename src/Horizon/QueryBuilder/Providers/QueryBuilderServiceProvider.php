@@ -23,7 +23,18 @@ final class QueryBuilderServiceProvider extends ServiceProvider
                 throw new QueryBuilderConnectionException('Connection manager binding must resolve to a ConnectionManagerContract instance.');
             }
 
-            $connection = $manager->connection();
+            $connectionName = $this->app->make('config')
+                ->get('query-builder.default_connection', 'default');
+            $connectionName = is_string($connectionName) && $connectionName !== ''
+                ? $connectionName
+                : 'default';
+
+            $connection = $manager->connection($connectionName);
+
+            if ($this->app->make('config')->get('query-builder.debug.log_queries', false) === true
+                && method_exists($connection, 'enableQueryLog')) {
+                $connection->enableQueryLog();
+            }
 
             if (! method_exists($connection, 'getPdo')) {
                 throw new QueryBuilderConnectionException('Database connection must expose a PDO instance for QueryBuilder.');
@@ -34,10 +45,10 @@ final class QueryBuilderServiceProvider extends ServiceProvider
 
             $mapper = $this->app->has(QueryResultMapperContract::class)
                 ? $this->app->make(QueryResultMapperContract::class)
-                : new RawQueryResultMapper();
+                : new RawQueryResultMapper;
 
             if (! $mapper instanceof QueryResultMapperContract) {
-                $mapper = new RawQueryResultMapper();
+                $mapper = new RawQueryResultMapper;
             }
 
             return new QueryBuilderFactory($pdo, $connection->getDriverName(), $mapper);

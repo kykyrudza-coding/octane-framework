@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Horizon\Exception;
 
-use Horizon\Contracts\Exception\Renderers\ErrorRendererContract;
+use Horizon\Arch\Application;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Contracts\Exception\HandlerContract;
+use Horizon\Contracts\Exception\Renderers\ErrorRendererContract;
 use Symfony\Component\ErrorHandler\ErrorHandler as SymfonyErrorHandler;
 use Throwable;
 
@@ -18,7 +20,13 @@ class Handler implements HandlerContract
 
     protected function isDebugMode(): bool
     {
-        return $this->debug ?? (bool) env('APP_DEBUG', false);
+        if ($this->debug !== null) {
+            return $this->debug;
+        }
+
+        $debug = $this->config('exceptions.debug', $this->config('app.debug', env('APP_DEBUG', false)));
+
+        return (bool) $debug;
     }
 
     public function register(): void
@@ -33,6 +41,12 @@ class Handler implements HandlerContract
 
     public function report(Throwable $exception): void
     {
+        foreach ($this->ignoredExceptions() as $ignored) {
+            if ($exception instanceof $ignored) {
+                return;
+            }
+        }
+
         error_log((string) $exception);
     }
 
@@ -85,5 +99,37 @@ class Handler implements HandlerContract
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
+    }
+
+    private function config(string $key, mixed $default = null): mixed
+    {
+        try {
+            $config = Application::getInstance()->make(ConfigRepositoryContract::class);
+
+            if ($config instanceof ConfigRepositoryContract) {
+                return $config->get($key, $default);
+            }
+        } catch (Throwable) {
+            //
+        }
+
+        return $default;
+    }
+
+    /**
+     * @return list<class-string<Throwable>>
+     */
+    private function ignoredExceptions(): array
+    {
+        $ignored = $this->config('exceptions.reporting.ignore', []);
+
+        if (! is_array($ignored)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $ignored,
+            static fn (mixed $class): bool => is_string($class) && is_subclass_of($class, Throwable::class),
+        ));
     }
 }

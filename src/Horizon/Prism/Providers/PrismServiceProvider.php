@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Providers;
 
-use Horizon\Support\Providers\ServiceProvider;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract;
 use Horizon\Contracts\Prism\Prism\Compiler\DirectiveRegistryContract;
 use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
 use Horizon\Contracts\Prism\Prism\Component\ComponentRegistryContract;
@@ -30,6 +31,7 @@ use Horizon\Prism\Prism\Component\ComponentResolver;
 use Horizon\Prism\Prism\Engine\PrismEngine;
 use Horizon\Prism\Prism\Prism;
 use Horizon\Prism\ViewFactory;
+use Horizon\Support\Providers\ServiceProvider;
 
 class PrismServiceProvider extends ServiceProvider
 {
@@ -54,6 +56,18 @@ class PrismServiceProvider extends ServiceProvider
         foreach ($this->builtinDirectives() as $directive) {
             $registry->register($directive);
         }
+
+        foreach ($this->configuredDirectives() as $name => $directive) {
+            $registry->register($directive, is_string($name) ? $name : null);
+        }
+
+        $components = $this->app->make(ComponentRegistryContract::class);
+
+        foreach ($this->configuredComponentAliases() as $alias => $component) {
+            if (method_exists($components, 'registerAlias')) {
+                $components->registerAlias($alias, $component);
+            }
+        }
     }
 
     // ─── Bindings ─────────────────────────────────────────────────────────
@@ -62,7 +76,7 @@ class PrismServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             DirectiveRegistryContract::class,
-            fn () => new DirectiveRegistry(),
+            fn () => new DirectiveRegistry,
         );
 
         $this->app->bindAlias('prism.directives', DirectiveRegistryContract::class);
@@ -74,7 +88,11 @@ class PrismServiceProvider extends ServiceProvider
             PrismCompilerContract::class,
             fn ($app) => new PrismCompiler(
                 directives: $app->make(DirectiveRegistryContract::class),
-                cachePath: $app->make('path.cache') . DIRECTORY_SEPARATOR . 'prism',
+                cachePath: $this->configString(
+                    'prism.compiler.cache.path',
+                    $app->make('path.cache').DIRECTORY_SEPARATOR.'prism',
+                ),
+                cacheEnabled: $this->configBool('prism.compiler.cache.enabled', true),
             ),
         );
 
@@ -91,7 +109,7 @@ class PrismServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             ComponentRegistryContract::class,
-            fn () => new ComponentRegistry(),
+            fn () => new ComponentRegistry,
         );
 
         // Concrete class alias so ComponentResolver can type-hint it
@@ -122,7 +140,10 @@ class PrismServiceProvider extends ServiceProvider
             fn ($app) => new PrismEngine(
                 componentResolver: $app->make(ComponentResolverContract::class),
                 compiler: $app->make(PrismCompiler::class),
-                viewsPath: $app->make('path.ui') . DIRECTORY_SEPARATOR . 'views',
+                viewsPath: $this->configString(
+                    'prism.views.path',
+                    $app->make('path.ui').DIRECTORY_SEPARATOR.'views',
+                ),
             ),
         );
 
@@ -136,7 +157,13 @@ class PrismServiceProvider extends ServiceProvider
             fn ($app) => new ViewFactory(
                 compiler: $app->make(PrismCompiler::class),
                 engine: $app->make(PrismEngineContract::class),
-                viewsPath: $app->make('path.ui') . DIRECTORY_SEPARATOR . 'views',
+                viewsPath: $this->configString(
+                    'prism.views.path',
+                    $app->make('path.ui').DIRECTORY_SEPARATOR.'views',
+                ),
+                extensions: $this->stringList(
+                    $this->config('prism.views.extensions', ['.prism.php', '.php', '.html']),
+                ),
             ),
         );
 
@@ -161,27 +188,128 @@ class PrismServiceProvider extends ServiceProvider
     // ─── Built-in directives ──────────────────────────────────────────────
 
     /**
-     * @return list<\Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract>
+     * @return list<DirectiveContract>
      */
     private function builtinDirectives(): array
     {
         return [
             // Conditions
-            new IfDirective(),
-            new ElseIfDirective(),
-            new ElseDirective(),
-            new EndIfDirective(),
+            new IfDirective,
+            new ElseIfDirective,
+            new ElseDirective,
+            new EndIfDirective,
 
             // Cycles
-            new EachDirective(),
-            new EndForeachDirective(),
+            new EachDirective,
+            new EndForeachDirective,
 
             // Templates
-            new LayoutDirective(),
-            new BlockDirective(),
-            new EndBlockDirective(),
-            new SlotDirective(),
-            new ImportDirective(),
+            new LayoutDirective,
+            new BlockDirective,
+            new EndBlockDirective,
+            new SlotDirective,
+            new ImportDirective,
         ];
+    }
+
+    /**
+     * @return array<string, class-string>
+     */
+    private function configuredComponentAliases(): array
+    {
+        return $this->stringMap($this->configArray('prism.components.aliases'));
+    }
+
+    /**
+     * @return array<int|string, DirectiveContract|callable>
+     */
+    private function configuredDirectives(): array
+    {
+        $directives = [];
+
+        foreach ($this->configArray('prism.directives') as $name => $directive) {
+            if (! is_string($directive) || ! class_exists($directive)) {
+                continue;
+            }
+
+            $instance = new $directive;
+
+            if ($instance instanceof DirectiveContract || is_callable($instance)) {
+                $directives[$name] = $instance;
+            }
+        }
+
+        return $directives;
+    }
+
+    private function configBool(string $key, bool $default): bool
+    {
+        $value = $this->config($key, $default);
+
+        return is_bool($value) ? $value : $default;
+    }
+
+    private function configString(string $key, string $default): string
+    {
+        $value = $this->config($key, $default);
+
+        return is_string($value) && $value !== '' ? $value : $default;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function configArray(string $key): array
+    {
+        $value = $this->config($key, []);
+
+        return is_array($value) ? $value : [];
+    }
+
+    private function config(string $key, mixed $default = null): mixed
+    {
+        if (! $this->app->has(ConfigRepositoryContract::class)) {
+            return $default;
+        }
+
+        $config = $this->app->make(ConfigRepositoryContract::class);
+
+        if (! $config instanceof ConfigRepositoryContract) {
+            return $default;
+        }
+
+        return $config->get($key, $default);
+    }
+
+    /**
+     * @param  array<string, mixed>  $value
+     * @return array<string, class-string>
+     */
+    private function stringMap(array $value): array
+    {
+        $map = [];
+
+        foreach ($value as $alias => $class) {
+            if (is_string($alias) && is_string($class) && $class !== '') {
+                $map[$alias] = $class;
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function stringList(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $value,
+            static fn (mixed $item): bool => is_string($item) && $item !== '',
+        ));
     }
 }

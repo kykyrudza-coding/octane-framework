@@ -14,10 +14,21 @@ final readonly class ValidatorFactory implements ValidatorFactoryContract
     public function __construct(
         private ?PresenceVerifierContract $presenceVerifier = null,
         private ?DtoFactoryContract $dtoFactory = null,
+        private bool $stopOnFirstFailure = false,
+        private array $messages = [],
+        private array $attributes = [],
     ) {}
 
     public function make(array $data, array $rules): ValidatorContract
     {
-        return new Validator($data, $rules, $this->presenceVerifier, $this->dtoFactory);
+        return new Validator(
+            data: $data,
+            rules: $rules,
+            presenceVerifier: $this->presenceVerifier,
+            dtoFactory: $this->dtoFactory,
+            stopOnFirstFailure: $this->stopOnFirstFailure,
+            messages: $this->messages,
+            attributes: $this->attributes,
+        );
     }
 }

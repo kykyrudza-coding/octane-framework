@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Horizon\Exception\Renderers;
 
 use Horizon\Arch\Application;
+use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Contracts\Exception\Renderers\ErrorRendererContract;
 use ReflectionClass;
 use Symfony\Component\ErrorHandler\Error\FatalError;
@@ -20,7 +21,10 @@ class HtmlErrorRenderer implements ErrorRendererContract
 
         $appView = null;
         try {
-            $appView = Application::getInstance()->basePath("resources/views/errors/{$statusCode}.php");
+            $configuredPath = $this->config('exceptions.rendering.views.path');
+            $appView = is_string($configuredPath) && $configuredPath !== ''
+                ? rtrim($configuredPath, '/\\').DIRECTORY_SEPARATOR."{$statusCode}.php"
+                : Application::getInstance()->basePath("resources/views/errors/{$statusCode}.php");
         } catch (Throwable) {
         }
 
@@ -100,5 +104,20 @@ class HtmlErrorRenderer implements ErrorRendererContract
         $code = $exception->getCode();
 
         return is_int($code) && $code >= 400 && $code < 600 ? $code : 500;
+    }
+
+    private function config(string $key, mixed $default = null): mixed
+    {
+        try {
+            $config = Application::getInstance()->make(ConfigRepositoryContract::class);
+
+            if ($config instanceof ConfigRepositoryContract) {
+                return $config->get($key, $default);
+            }
+        } catch (Throwable) {
+            //
+        }
+
+        return $default;
     }
 }

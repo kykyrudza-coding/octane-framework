@@ -17,33 +17,27 @@ if ($hasher->needsRehash($hash)) {
 }
 ```
 
-`SupportServiceProvider` читає `config('hashing.driver', 'bcrypt')`:
-
-- `bcrypt`: `BcryptHasher`, default cost 10;
-- `argon2`: `Argon2Hasher` на базі Argon2id, default memory 65536, time 4,
-  threads 1.
-
-Приклад configuration:
+`SupportServiceProvider` читає `config/hashing.php`:
 
 ```php
-// config/hashing.php
 return [
     'driver' => env('HASH_DRIVER', 'bcrypt'),
+
+    'bcrypt' => [
+        'rounds' => (int) env('BCRYPT_ROUNDS', 10),
+    ],
+
+    'argon2' => [
+        'memory' => (int) env('ARGON2_MEMORY', 65536),
+        'time' => (int) env('ARGON2_TIME', 4),
+        'threads' => (int) env('ARGON2_THREADS', 1),
+    ],
 ];
 ```
 
-Параметри cost/memory не зчитуються з config автоматично. Для custom
-параметрів перевизначте binding у provider, який реєструється після
-framework provider:
+Підтримані drivers:
 
-```php
-public static int $priority = -10;
+- `bcrypt`: `BcryptHasher`;
+- `argon2`: `Argon2Hasher` на базі Argon2id.
 
-$this->app->singleton(
-    HasherContract::class,
-    fn () => new BcryptHasher(rounds: 12),
-);
-```
-
-Static `Horizon\Support\Hashing\Hasher` має окремий internal driver і не
-використовує container binding, доки явно не викликано `Hasher::setDriver()`.
+Static `Horizon\Support\Hashing\Hasher` має окремий internal driver і не використовує container binding, доки явно не викликано `Hasher::setDriver()`.

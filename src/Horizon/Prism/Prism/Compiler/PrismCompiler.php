@@ -11,15 +11,15 @@ use Horizon\Prism\Exceptions\TemplateCompilationException;
 
 final readonly class PrismCompiler implements PrismCompilerContract
 {
-
     public function __construct(
         private DirectiveRegistryContract $directives,
-        private string                    $cachePath,
+        private string $cachePath,
+        private bool $cacheEnabled = true,
     ) {}
 
     public function compile(string $path): string
     {
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             throw new TemplateCompilationException("File $path does not exist.");
         }
 
@@ -29,7 +29,7 @@ final readonly class PrismCompiler implements PrismCompilerContract
             $contents = file_get_contents($path);
             $result = $this->compileString($contents);
 
-            if (!is_dir(dirname($compiled))) {
+            if (! is_dir(dirname($compiled))) {
                 mkdir(
                     directory: dirname($compiled),
                     permissions: 0755,
@@ -45,9 +45,13 @@ final readonly class PrismCompiler implements PrismCompilerContract
 
     public function isExpired(string $path): bool
     {
+        if (! $this->cacheEnabled) {
+            return true;
+        }
+
         $compiled = $this->compiledPath($path);
 
-        if (!file_exists($compiled)) {
+        if (! file_exists($compiled)) {
             return true;
         }
 
@@ -58,7 +62,7 @@ final readonly class PrismCompiler implements PrismCompilerContract
     {
         $hash = sha1($path);
 
-        return rtrim($this->cachePath, '/\\') . '/' . $hash . '.php';
+        return rtrim($this->cachePath, '/\\').'/'.$hash.'.php';
     }
 
     private function compileString(string $contents): string
@@ -76,8 +80,8 @@ final readonly class PrismCompiler implements PrismCompilerContract
         // {{ $variable }} → <?php echo htmlspecialchars($variable, ENT_QUOTES)
 
         return preg_replace(
-        '/\{\{\s*(.+?)\s*\}\}/',
-        '<?php echo htmlspecialchars((string)($1), ENT_QUOTES, \'UTF-8\'); ?>',
+            '/\{\{\s*(.+?)\s*\}\}/',
+            '<?php echo htmlspecialchars((string)($1), ENT_QUOTES, \'UTF-8\'); ?>',
             $contents
         );
     }
@@ -122,14 +126,14 @@ final readonly class PrismCompiler implements PrismCompilerContract
         // <Button text="Click" /> → self-closing
         $contents = preg_replace_callback(
             '/<([A-Z][a-zA-Z]*)\s*([^>]*?)\/>/s',
-            fn(array $m) => $this->compileSelfClosingComponent($m[1], $m[2]),
+            fn (array $m) => $this->compileSelfClosingComponent($m[1], $m[2]),
             $contents
         );
 
         // <Button text="Click">...</Button> → з контентом
         $contents = preg_replace_callback(
             '/<([A-Z][a-zA-Z]*)\s*([^>]*?)>(.*?)<\/\1>/s',
-            fn(array $m) => $this->compileWrappingComponent($m[1], $m[2], $m[3]),
+            fn (array $m) => $this->compileWrappingComponent($m[1], $m[2], $m[3]),
             $contents
         );
 
@@ -139,6 +143,7 @@ final readonly class PrismCompiler implements PrismCompilerContract
     private function compileSelfClosingComponent(string $name, string $attrs): string
     {
         $props = $this->parseAttributes($attrs);
+
         return "<?php echo \$__prism->component('$name', $props); ?>";
     }
 
@@ -147,6 +152,7 @@ final readonly class PrismCompiler implements PrismCompilerContract
         $props = $this->parseAttributes($attrs);
         $slot = trim($slot);
         $escapedSlot = addslashes($slot);
+
         return "<?php echo \$__prism->component('$name', $props, '$escapedSlot'); ?>";
     }
 
@@ -160,6 +166,6 @@ final readonly class PrismCompiler implements PrismCompilerContract
             $props[] = "'$match[1]' => '$match[2]'";
         }
 
-        return '[' . implode(', ', $props) . ']';
+        return '['.implode(', ', $props).']';
     }
 }
