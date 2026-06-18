@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Horizon\Contracts\Http\Request;
 
+use Horizon\Contracts\Validation\ValidatedDataContract;
+
 interface RequestContract
 {
     public function method(): string;
@@ -50,4 +52,9 @@ interface RequestContract
     public function isGet(): bool;
 
     public function isPost(): bool;
+
+    /**
+     * @param  array<string, mixed>  $rules
+     */
+    public function validate(array $rules): ValidatedDataContract;
 }

@@ -7,6 +7,7 @@ namespace Tests\Http;
 use Horizon\Arch\Container;
 use Horizon\Arch\Http\Pipes\InvokeController;
 use Horizon\Contracts\Http\Request\RequestContract;
+use Horizon\Contracts\Validation\ValidatedDataContract;
 use Horizon\Http\Request\Request;
 use Horizon\Http\Request\RequestContext;
 use Horizon\Http\Response\Response;
@@ -231,6 +232,11 @@ class HttpTest extends TestCase
             public function isPost(): bool
             {
                 return false;
+            }
+
+            public function validate(array $rules): ValidatedDataContract
+            {
+                throw new RuntimeException('Validation is not available in this request test double.');
             }
 
             public function file(string $key, mixed $default = null): mixed

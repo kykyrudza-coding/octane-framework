@@ -12,7 +12,10 @@ use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Request\RequestContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
 use Horizon\Contracts\Http\Response\ResponseFactoryContract;
+use Horizon\Contracts\Validation\ValidatorFactoryContract;
 use Horizon\Support\Pipeline\PipeInterface;
+use Horizon\Validation\FormRequest;
+use Horizon\Validation\ValidatorFactory;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -160,6 +163,10 @@ class InvokeController implements PipeInterface
                 return $context->getRequest();
             }
 
+            if (is_a($typeName, FormRequest::class, true)) {
+                return $this->resolveFormRequest($typeName, $context);
+            }
+
             return $this->container->make($typeName);
         }
 
@@ -176,6 +183,25 @@ class InvokeController implements PipeInterface
         }
 
         throw new ControllerInvocationException("Cannot resolve controller parameter \$$name.");
+    }
+
+    /**
+     * @param  class-string<FormRequest>  $type
+     */
+    protected function resolveFormRequest(string $type, RequestContextContract $context): FormRequest
+    {
+        $factory = $this->container->has(ValidatorFactoryContract::class)
+            ? $this->container->make(ValidatorFactoryContract::class)
+            : new ValidatorFactory;
+
+        if (! $factory instanceof ValidatorFactoryContract) {
+            $factory = new ValidatorFactory;
+        }
+
+        $request = new $type($context->getRequest(), $factory);
+        $request->validateResolved();
+
+        return $request;
     }
 
     protected function castRouteParameter(string $value, ReflectionParameter $parameter): mixed

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Horizon\Http\Request;
 
 use Horizon\Contracts\Http\Request\RequestContract;
+use Horizon\Contracts\Validation\ValidatedDataContract;
+use Horizon\Validation\ValidatorFactory;
 
 class Request implements RequestContract
 {
@@ -134,6 +136,13 @@ class Request implements RequestContract
     public function isPost(): bool
     {
         return $this->isMethod('POST');
+    }
+
+    public function validate(array $rules): ValidatedDataContract
+    {
+        return (new ValidatorFactory)
+            ->make($this->all(), $rules)
+            ->validate();
     }
 
     /**

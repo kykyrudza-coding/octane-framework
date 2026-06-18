@@ -1,0 +1,5 @@
+{
+    "provider": "Horizon\\Validation\\Providers\\ValidationServiceProvider",
+    "name": "octane/validation",
+    "dependencies": {}
+}
