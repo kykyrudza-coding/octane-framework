@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
-use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Arch\Exceptions\BindingResolutionException;
+use Horizon\Arch\Exceptions\ControllerInvocationException;
+use Horizon\Contracts\Arch\ContainerContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Request\RequestContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
@@ -15,7 +17,6 @@ use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
-use RuntimeException;
 use Stringable;
 
 class InvokeController implements PipeInterface
@@ -29,7 +30,7 @@ class InvokeController implements PipeInterface
         $route = $payload->getRoute();
 
         if ($route === null) {
-            throw new RuntimeException('Cannot invoke controller before a route is resolved.');
+            throw new ControllerInvocationException('Cannot invoke controller before a route is resolved.');
         }
 
         $action = $route->action();
@@ -39,14 +40,14 @@ class InvokeController implements PipeInterface
             $action instanceof Closure => $action(...$this->resolveFunctionArguments($action, $payload, $params)),
             is_array($action) => $this->invokeArrayAction($action, $payload, $params),
             is_string($action) => $this->invokeStringAction($action, $payload, $params),
-            default => throw new RuntimeException('Invalid route action.'),
+            default => throw new ControllerInvocationException('Invalid route action.'),
         };
 
         if (! $result instanceof ResponseContract) {
             $factory = $this->container->make(ResponseFactoryContract::class);
 
             if (! $factory instanceof ResponseFactoryContract) {
-                throw new RuntimeException('Response factory binding must resolve to a ResponseFactoryContract instance.');
+                throw new BindingResolutionException('Response factory binding must resolve to a ResponseFactoryContract instance.');
             }
 
             $result = $factory->make($this->responseBody($result));
@@ -64,7 +65,7 @@ class InvokeController implements PipeInterface
         $controller = $this->container->make($controllerClass);
 
         if (! is_object($controller) || ! method_exists($controller, $method)) {
-            throw new RuntimeException("Controller action $controllerClass@$method is not callable.");
+            throw new ControllerInvocationException("Controller action $controllerClass@$method is not callable.");
         }
 
         return $controller->{$method}(
@@ -75,7 +76,7 @@ class InvokeController implements PipeInterface
     protected function invokeStringAction(string $action, RequestContextContract $context, array $params): mixed
     {
         if (! str_contains($action, '@')) {
-            throw new RuntimeException("Invalid string action format: '$action'. Expected 'Controller@method'.");
+            throw new ControllerInvocationException("Invalid string action format: '$action'. Expected 'Controller@method'.");
         }
 
         [$controllerClass, $method] = explode('@', $action, 2);
@@ -83,7 +84,7 @@ class InvokeController implements PipeInterface
         $controller = $this->container->make($controllerClass);
 
         if (! is_object($controller) || ! method_exists($controller, $method)) {
-            throw new RuntimeException("Controller action $controllerClass@$method is not callable.");
+            throw new ControllerInvocationException("Controller action $controllerClass@$method is not callable.");
         }
 
         return $controller->{$method}(
@@ -174,7 +175,7 @@ class InvokeController implements PipeInterface
             return null;
         }
 
-        throw new RuntimeException("Cannot resolve controller parameter \$$name.");
+        throw new ControllerInvocationException("Cannot resolve controller parameter \$$name.");
     }
 
     protected function castRouteParameter(string $value, ReflectionParameter $parameter): mixed
@@ -204,6 +205,6 @@ class InvokeController implements PipeInterface
             return (string) $result;
         }
 
-        throw new RuntimeException('Controller result must be a ResponseContract, scalar, stringable, or null.');
+        throw new ControllerInvocationException('Controller result must be a ResponseContract, scalar, stringable, or null.');
     }
 }

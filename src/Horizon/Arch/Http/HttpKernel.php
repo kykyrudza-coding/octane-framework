@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Horizon\Arch\Http;
 
+use Horizon\Arch\Exceptions\BindingResolutionException;
 use Horizon\Arch\Http\Pipes\BindRouteParameters;
 use Horizon\Arch\Http\Pipes\InvokeController;
 use Horizon\Arch\Http\Pipes\ResolveRoute;
 use Horizon\Arch\Http\Pipes\RunGlobalMiddleware;
 use Horizon\Arch\Http\Pipes\RunGroupMiddleware;
 use Horizon\Arch\Http\Pipes\RunRouteMiddleware;
-use Horizon\Contracts\Arch\Application\ApplicationContract;
-use Horizon\Contracts\Http\HttpKernel\HttpKernelContract;
-use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
+use Horizon\Contracts\Arch\ApplicationContract;
+use Horizon\Contracts\Arch\Http\HttpKernelContract;
+use Horizon\Contracts\Http\Collection\MiddlewareCollectionContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
+use Horizon\Http\Exceptions\InvalidResponseException;
 use Horizon\Support\Pipeline\Pipeline;
-use RuntimeException;
 
 class HttpKernel implements HttpKernelContract
 {
@@ -43,7 +44,7 @@ class HttpKernel implements HttpKernelContract
             ->then(fn (RequestContextContract $context) => $context->getResponse());
 
         if (! $response instanceof ResponseContract) {
-            throw new RuntimeException('HTTP pipeline must return a ResponseContract instance.');
+            throw new InvalidResponseException('HTTP pipeline must return a ResponseContract instance.');
         }
 
         return $response;
@@ -55,7 +56,7 @@ class HttpKernel implements HttpKernelContract
     ): void {
         $collection = $this->app->make(MiddlewareCollectionContract::class);
         if (! $collection instanceof MiddlewareCollectionContract) {
-            throw new RuntimeException('Middleware collection binding must resolve to a MiddlewareCollectionContract instance.');
+            throw new BindingResolutionException('Middleware collection binding must resolve to a MiddlewareCollectionContract instance.');
         }
 
         $middlewares = array_merge(

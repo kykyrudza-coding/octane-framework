@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Horizon\Http\Response;
 
+use Horizon\Http\Exceptions\ResponseEncodingException;
 use JsonException;
-use RuntimeException;
 
 class JsonResponse extends Response
 {
@@ -45,7 +45,7 @@ class JsonResponse extends Response
             $this->body = json_encode($this->data, JSON_THROW_ON_ERROR);
 
         } catch (JsonException $e) {
-            throw new RuntimeException('Failed to encode JSON response: '.$e->getMessage(), 0, $e);
+            throw new ResponseEncodingException('Failed to encode JSON response: '.$e->getMessage(), $e);
         }
 
         parent::send();

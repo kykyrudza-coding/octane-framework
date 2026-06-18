@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism;
 
-use Horizon\Contracts\Prism\Compiler\DirectiveContract;
-use Horizon\Contracts\Prism\Compiler\DirectiveRegistryContract;
-use Horizon\Contracts\Prism\PrismContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveRegistryContract;
+use Horizon\Contracts\Prism\Prism\PrismContract;
 use Horizon\Contracts\Prism\ViewContract;
 use Horizon\Contracts\Prism\ViewFactoryContract;
 use Horizon\Prism\Prism\Component\ComponentRegistry;

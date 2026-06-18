@@ -3,14 +3,16 @@
 declare(strict_types=1);
 
 use Horizon\Arch\Application;
+use Horizon\Arch\Exceptions\BindingResolutionException;
 use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
-use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Contracts\Arch\ContainerContract;
 use Horizon\Contracts\Http\Request\RequestContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
 use Horizon\Contracts\Http\Response\ResponseFactoryContract;
 use Horizon\Contracts\Prism\ViewContract;
 use Horizon\Contracts\Prism\ViewFactoryContract;
 use Horizon\Http\Exceptions\HttpException;
+use Horizon\Http\Exceptions\InvalidResponseException;
 use Horizon\Http\Response\RedirectResponse;
 
 if (! function_exists('app')) {
@@ -46,7 +48,7 @@ if (! function_exists('config')) {
         $repository = Application::getInstance()->make(ConfigRepositoryContract::class);
 
         if (! $repository instanceof ConfigRepositoryContract) {
-            throw new RuntimeException('Config repository binding must resolve to a ConfigRepositoryContract instance.');
+            throw new BindingResolutionException('Config repository binding must resolve to a ConfigRepositoryContract instance.');
         }
 
         return $repository->get($key, $default);
@@ -98,7 +100,7 @@ if (! function_exists('response')) {
         $factory = Application::getInstance()->make(ResponseFactoryContract::class);
 
         if (! $factory instanceof ResponseFactoryContract) {
-            throw new RuntimeException('Response factory binding must resolve to a ResponseFactoryContract instance.');
+            throw new BindingResolutionException('Response factory binding must resolve to a ResponseFactoryContract instance.');
         }
 
         if ($body === null) {
@@ -119,12 +121,12 @@ if (! function_exists('redirect')) {
     {
         $factory = Application::getInstance()->make(ResponseFactoryContract::class);
         if (! $factory instanceof ResponseFactoryContract) {
-            throw new RuntimeException('Response factory binding must resolve to a ResponseFactoryContract instance.');
+            throw new BindingResolutionException('Response factory binding must resolve to a ResponseFactoryContract instance.');
         }
 
         $response = $factory->redirect($url, $status, $headers);
         if (! $response instanceof RedirectResponse) {
-            throw new RuntimeException('Response factory redirect must return a RedirectResponse instance.');
+            throw new InvalidResponseException('Response factory redirect must return a RedirectResponse instance.');
         }
 
         return $response;
@@ -140,7 +142,7 @@ if (! function_exists('request')) {
         $request = app(RequestContract::class);
 
         if (! $request instanceof RequestContract) {
-            throw new RuntimeException('Request binding must resolve to a RequestContract instance.');
+            throw new BindingResolutionException('Request binding must resolve to a RequestContract instance.');
         }
 
         return $request;
@@ -170,7 +172,7 @@ if (! function_exists('view')) {
         $factory = Application::getInstance()->make(ViewFactoryContract::class);
 
         if (! $factory instanceof ViewFactoryContract) {
-            throw new RuntimeException('View factory binding must resolve to a ViewFactoryContract instance.');
+            throw new BindingResolutionException('View factory binding must resolve to a ViewFactoryContract instance.');
         }
 
         if ($view === null) {
@@ -225,5 +227,4 @@ if (! function_exists('vite')) {
         ';
     }
 }
-
 

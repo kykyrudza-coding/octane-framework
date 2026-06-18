@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Horizon\Database\Connections\Drivers;
 
 use Horizon\Contracts\Database\Connections\Drivers\DriverContract;
+use Horizon\Database\Exceptions\DatabaseConnectionException;
 use PDO;
 use PDOException;
-use RuntimeException;
 
 final class PostgresDriver implements DriverContract
 {
@@ -38,7 +38,7 @@ final class PostgresDriver implements DriverContract
 
             return $pdo;
         } catch (PDOException $e) {
-            throw new RuntimeException(
+            throw new DatabaseConnectionException(
                 "PostgreSQL connection failed: {$e->getMessage()}",
                 previous: $e,
             );

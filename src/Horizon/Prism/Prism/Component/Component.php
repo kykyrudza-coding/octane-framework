@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism\Component;
 
-use Horizon\Contracts\Prism\Component\ComponentContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentContract;
 
 /**
  * Abstract base class for Prism components.

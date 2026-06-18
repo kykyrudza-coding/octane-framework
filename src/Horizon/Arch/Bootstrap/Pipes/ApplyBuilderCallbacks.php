@@ -6,11 +6,11 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
-use Horizon\Contracts\Exception\ExceptionHandlerContract;
-use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
+use Horizon\Arch\Exceptions\BindingResolutionException;
+use Horizon\Contracts\Exception\HandlerContract;
+use Horizon\Contracts\Http\Collection\MiddlewareCollectionContract;
 use Horizon\Contracts\Routing\RouteRegistrarContract;
 use Horizon\Support\Pipeline\PipeInterface;
-use RuntimeException;
 
 class ApplyBuilderCallbacks implements PipeInterface
 {
@@ -31,7 +31,7 @@ class ApplyBuilderCallbacks implements PipeInterface
     {
         $registrar = $payload->app->make(RouteRegistrarContract::class);
         if (! $registrar instanceof RouteRegistrarContract) {
-            throw new RuntimeException('Route registrar binding must resolve to a RouteRegistrarContract instance.');
+            throw new BindingResolutionException('Route registrar binding must resolve to a RouteRegistrarContract instance.');
         }
 
         foreach ($payload->getWebRoutes() as $routeFile) {
@@ -59,7 +59,7 @@ class ApplyBuilderCallbacks implements PipeInterface
     {
         $collection = $payload->app->make(MiddlewareCollectionContract::class);
         if (! $collection instanceof MiddlewareCollectionContract) {
-            throw new RuntimeException('Middleware collection binding must resolve to a MiddlewareCollectionContract instance.');
+            throw new BindingResolutionException('Middleware collection binding must resolve to a MiddlewareCollectionContract instance.');
         }
 
         if ($callback = $payload->getMiddleware()) {
@@ -75,9 +75,9 @@ class ApplyBuilderCallbacks implements PipeInterface
     protected function exception(ApplicationBuilder $payload): void
     {
         if ($payload->getExceptions() instanceof Closure) {
-            $handler = $payload->app->make(ExceptionHandlerContract::class);
-            if (! $handler instanceof ExceptionHandlerContract) {
-                throw new RuntimeException('Exception handler binding must resolve to an ExceptionHandlerContract instance.');
+            $handler = $payload->app->make(HandlerContract::class);
+            if (! $handler instanceof HandlerContract) {
+                throw new BindingResolutionException('Exception handler binding must resolve to a HandlerContract instance.');
             }
 
             ($payload->getExceptions())(

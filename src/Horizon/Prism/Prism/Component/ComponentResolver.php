@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism\Component;
 
-use Horizon\Contracts\Prism\Component\ComponentContract;
-use Horizon\Contracts\Prism\Component\ComponentRegistryContract;
-use Horizon\Contracts\Prism\Component\ComponentResolverContract;
-use RuntimeException;
+use Horizon\Contracts\Prism\Prism\Component\ComponentContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentRegistryContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentResolverContract;
+use Horizon\Prism\Exceptions\ComponentResolutionException;
 
 final readonly class ComponentResolver implements ComponentResolverContract
 {
@@ -20,7 +20,7 @@ final readonly class ComponentResolver implements ComponentResolverContract
         $component = $this->registry->get($alias);
 
         if ($component === null) {
-            throw new RuntimeException(
+            throw new ComponentResolutionException(
                 "Component '$alias' is not registered. Did you forget to register it in the service provider?"
             );
         }

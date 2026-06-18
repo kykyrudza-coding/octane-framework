@@ -6,8 +6,8 @@ namespace Horizon\Console\Commands;
 
 use Horizon\Arch\Application;
 use Horizon\Console\Command;
-use Horizon\Contracts\Console\ConsoleInputContract;
-use Horizon\Contracts\Console\ConsoleOutputContract;
+use Horizon\Contracts\Console\Input\ConsoleInputContract;
+use Horizon\Contracts\Console\Output\ConsoleOutputContract;
 
 final class VersionCommand extends Command
 {

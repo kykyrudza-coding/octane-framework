@@ -7,6 +7,7 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
 use Horizon\Arch\Config\ConfigRepository;
+use Horizon\Arch\Exceptions\BootstrapException;
 use Horizon\Contracts\Arch\Config\ConfigRepositoryContract;
 use Horizon\Support\Pipeline\PipeInterface;
 
@@ -20,7 +21,7 @@ class LoadConfiguration implements PipeInterface
     {
         $configPath = $payload->app->make('path.config');
         if (! is_string($configPath)) {
-            throw new \RuntimeException('Configuration path binding must resolve to a string.');
+            throw new BootstrapException('Configuration path binding must resolve to a string.');
         }
 
         $repository = new ConfigRepository;

@@ -6,7 +6,7 @@ namespace Horizon\Support\Casts;
 
 use Horizon\Contracts\Support\Casts\CastableContract;
 use Horizon\Contracts\Support\Casts\CastRegistryContract;
-use InvalidArgumentException;
+use Horizon\Support\Exceptions\CastException;
 
 final class CastRegistry implements CastRegistryContract
 {
@@ -21,7 +21,7 @@ final class CastRegistry implements CastRegistryContract
     public function get(string $type): CastableContract
     {
         if (!isset($this->casts[$type])) {
-            throw new InvalidArgumentException(
+            throw new CastException(
                 "Cast [$type] is not registered."
             );
         }

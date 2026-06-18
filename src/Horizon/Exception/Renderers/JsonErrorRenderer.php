@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Exception\Renderers;
 
-use Horizon\Contracts\Exception\ErrorRendererContract;
+use Horizon\Contracts\Exception\Renderers\ErrorRendererContract;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Throwable;
 

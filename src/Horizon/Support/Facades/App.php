@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Horizon\Support\Facades;
 
 use Horizon\Arch\Application;
-use Horizon\Contracts\Arch\Application\ApplicationContract;
+use Horizon\Contracts\Arch\ApplicationContract;
 
 
 /**

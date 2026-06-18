@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Horizon\Prism;
 
-use Horizon\Contracts\Prism\Engine\PrismEngineContract;
+use Horizon\Contracts\Prism\Prism\Engine\PrismEngineContract;
 use Horizon\Contracts\Prism\ViewContract;
 use Horizon\Contracts\Prism\ViewFactoryContract;
-use Horizon\Contracts\Prism\Compiler\PrismCompilerContract;
-use InvalidArgumentException;
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
+use Horizon\Prism\Exceptions\ViewNotFoundException;
 
 final class ViewFactory implements ViewFactoryContract
 {
@@ -47,7 +47,7 @@ final class ViewFactory implements ViewFactoryContract
         try {
             $this->resolvePath($view);
             return true;
-        } catch (InvalidArgumentException) {
+        } catch (ViewNotFoundException) {
             return false;
         }
     }
@@ -85,7 +85,7 @@ final class ViewFactory implements ViewFactoryContract
             }
         }
 
-        throw new InvalidArgumentException(
+        throw new ViewNotFoundException(
             "View '$view' not found in path '$this->viewsPath'."
         );
     }

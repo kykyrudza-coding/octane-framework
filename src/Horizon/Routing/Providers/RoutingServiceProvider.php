@@ -8,10 +8,10 @@ use Horizon\Support\Providers\ServiceProvider;
 use Horizon\Contracts\Routing\RouteCollectionContract;
 use Horizon\Contracts\Routing\RouterContract;
 use Horizon\Contracts\Routing\RouteRegistrarContract;
+use Horizon\Routing\Exceptions\RouteBindingException;
 use Horizon\Routing\RouteCollection;
 use Horizon\Routing\Router;
 use Horizon\Routing\RouteRegistrar;
-use RuntimeException;
 
 class RoutingServiceProvider extends ServiceProvider
 {
@@ -27,7 +27,7 @@ class RoutingServiceProvider extends ServiceProvider
             function () {
                 $routes = $this->app->make(RouteCollectionContract::class);
                 if (! $routes instanceof RouteCollectionContract) {
-                    throw new RuntimeException('Route collection binding must resolve to a RouteCollectionContract instance.');
+                    throw new RouteBindingException('Route collection binding must resolve to a RouteCollectionContract instance.');
                 }
 
                 return new Router($routes);
@@ -39,7 +39,7 @@ class RoutingServiceProvider extends ServiceProvider
             function () {
                 $router = $this->app->make(RouterContract::class);
                 if (! $router instanceof RouterContract) {
-                    throw new RuntimeException('Router binding must resolve to a RouterContract instance.');
+                    throw new RouteBindingException('Router binding must resolve to a RouterContract instance.');
                 }
 
                 return new RouteRegistrar($router);
@@ -51,7 +51,7 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $registrar = $this->app->make(RouteRegistrarContract::class);
         if (! $registrar instanceof RouteRegistrarContract) {
-            throw new RuntimeException('Route registrar binding must resolve to a RouteRegistrarContract instance.');
+            throw new RouteBindingException('Route registrar binding must resolve to a RouteRegistrarContract instance.');
         }
     }
 }

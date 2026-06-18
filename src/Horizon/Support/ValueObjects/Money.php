@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Support\ValueObjects;
 
-use InvalidArgumentException;
+use Horizon\Support\Exceptions\ValueObjectException;
 
 final readonly class Money
 {
@@ -31,7 +31,7 @@ final readonly class Money
     public static function fromString(string $amount, string $currency = 'USD'): Money
     {
         if (!is_numeric($amount)) {
-            throw new InvalidArgumentException("Invalid amount: $amount");
+            throw new ValueObjectException("Invalid amount: $amount");
         }
 
         return new Money($amount, strtoupper($currency));
@@ -113,7 +113,7 @@ final readonly class Money
     private function assertSameCurrency(Money $other): void
     {
         if ($this->currency !== $other->currency) {
-            throw new InvalidArgumentException(
+            throw new ValueObjectException(
                 "Currency mismatch: $this->currency and $other->currency."
             );
         }

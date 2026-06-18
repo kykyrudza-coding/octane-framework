@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Arch;
 
 use Horizon\Arch\Container;
-use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Contracts\Arch\ContainerContract;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use RuntimeException;

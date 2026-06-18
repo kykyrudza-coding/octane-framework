@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Http\Collection;
 
-use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
+use Horizon\Contracts\Http\Collection\MiddlewareCollectionContract;
 
 class MiddlewareCollection implements MiddlewareCollectionContract
 {

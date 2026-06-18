@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Horizon\Exception;
 
-use Horizon\Contracts\Exception\ErrorRendererContract;
-use Horizon\Contracts\Exception\ExceptionHandlerContract;
+use Horizon\Contracts\Exception\Renderers\ErrorRendererContract;
+use Horizon\Contracts\Exception\HandlerContract;
 use Symfony\Component\ErrorHandler\ErrorHandler as SymfonyErrorHandler;
 use Throwable;
 
-class Handler implements ExceptionHandlerContract
+class Handler implements HandlerContract
 {
     public function __construct(
         protected ErrorRendererContract $renderer,

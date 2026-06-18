@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Horizon\Console;
 
-use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Contracts\Arch\ContainerContract;
 use Horizon\Contracts\Console\CommandContract;
 use Horizon\Contracts\Console\CommandRegistryContract;
+use Horizon\Console\Exceptions\InvalidCommandException;
 use ReflectionClass;
 use ReflectionException;
-use RuntimeException;
 
 final class CommandRegistry implements CommandRegistryContract
 {
@@ -25,7 +25,7 @@ final class CommandRegistry implements CommandRegistryContract
     public function register(string $command): void
     {
         if (! is_a($command, CommandContract::class, true)) {
-            throw new RuntimeException("Console command [$command] must implement CommandContract.");
+            throw new InvalidCommandException("Console command [$command] must implement CommandContract.");
         }
 
         $this->commands[$command::commandName()] = $command;
@@ -46,7 +46,7 @@ final class CommandRegistry implements CommandRegistryContract
         $instance = $this->container->make($command);
 
         if (! $instance instanceof CommandContract) {
-            throw new RuntimeException("Console command [$command] must implement CommandContract.");
+            throw new InvalidCommandException("Console command [$command] must implement CommandContract.");
         }
 
         return $instance;

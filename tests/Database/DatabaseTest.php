@@ -180,6 +180,23 @@ class DatabaseTest extends TestCase
         $this->assertFalse($schema->hasTable('members'));
     }
 
+    public function test_schema_builder_places_foreign_keys_after_columns(): void
+    {
+        $schema = new SchemaBuilder($this->manager, new SqliteSchemaCompiler());
+        $schema->create('users', [Column::id()]);
+
+        $schema->create('posts', [
+            Column::id(),
+            Column::foreignId('user_id')->references('id')->on('users')->cascadeOnDelete(),
+            Column::string('title'),
+            Column::text('description'),
+            Column::timestamps(),
+        ]);
+
+        $this->assertTrue($schema->hasTable('posts'));
+        $this->assertTrue($schema->hasColumn('posts', 'title'));
+    }
+
     public function test_migration_repository_creates_table_and_stores_records(): void
     {
         $repository = new MigrationRepository($this->manager);

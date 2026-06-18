@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Horizon\Database\Connections;
 
-use Horizon\Contracts\Arch\Application\ApplicationContract;
+use Horizon\Contracts\Arch\ApplicationContract;
 use Horizon\Contracts\Database\Connections\ConnectionContract;
 use Horizon\Contracts\Database\Connections\ConnectionFactoryContract;
 use Horizon\Contracts\Database\Connections\Drivers\DriverContract;
 use Horizon\Database\Connections\Drivers\MySqlDriver;
 use Horizon\Database\Connections\Drivers\PostgresDriver;
 use Horizon\Database\Connections\Drivers\SqliteDriver;
-use InvalidArgumentException;
+use Horizon\Database\Exceptions\DatabaseConfigurationException;
 
 final class ConnectionFactory implements ConnectionFactoryContract
 {
@@ -35,7 +35,7 @@ final class ConnectionFactory implements ConnectionFactoryContract
         $driverName = $config['driver'] ?? null;
 
         if (! is_string($driverName) || $driverName === '') {
-            throw new InvalidArgumentException(
+            throw new DatabaseConfigurationException(
                 'Database connection config must specify a [driver].'
             );
         }
@@ -57,7 +57,7 @@ final class ConnectionFactory implements ConnectionFactoryContract
         $driver = $this->drivers[$driverName] ?? null;
 
         if ($driver === null) {
-            throw new InvalidArgumentException(
+            throw new DatabaseConfigurationException(
                 "Driver [$driverName] not supported."
             );
         }

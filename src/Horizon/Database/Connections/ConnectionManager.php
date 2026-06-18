@@ -7,7 +7,7 @@ namespace Horizon\Database\Connections;
 use Horizon\Contracts\Database\Connections\ConnectionContract;
 use Horizon\Contracts\Database\Connections\ConnectionFactoryContract;
 use Horizon\Contracts\Database\Connections\ConnectionManagerContract;
-use InvalidArgumentException;
+use Horizon\Database\Exceptions\DatabaseConfigurationException;
 
 final class ConnectionManager implements ConnectionManagerContract
 {
@@ -60,7 +60,7 @@ final class ConnectionManager implements ConnectionManagerContract
         $config = $this->config['connections'][$name] ?? null;
 
         if ($config === null) {
-            throw new InvalidArgumentException(
+            throw new DatabaseConfigurationException(
                 "Connection [$name] not configured."
             );
         }

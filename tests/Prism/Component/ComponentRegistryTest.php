@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Prism\Component;
 
-use Horizon\Contracts\Prism\Component\ComponentContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentContract;
 use Horizon\Prism\Prism\Component\ComponentRegistry;
 use PHPUnit\Framework\TestCase;
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Horizon\Support\Hashing;
 
 use Horizon\Contracts\Support\Hashing\HasherContract;
-use RuntimeException;
+use Horizon\Support\Exceptions\HashingException;
 
 final readonly class BcryptHasher implements HasherContract
 {
@@ -20,7 +20,7 @@ final readonly class BcryptHasher implements HasherContract
         ]);
 
         if ($hash === false) {
-            throw new RuntimeException('Bcrypt hashing not supported.');
+            throw new HashingException('Bcrypt hashing not supported.');
         }
 
         return $hash;

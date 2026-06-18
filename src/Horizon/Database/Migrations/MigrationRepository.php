@@ -7,7 +7,7 @@ namespace Horizon\Database\Migrations;
 use Horizon\Contracts\Database\Connections\ConnectionContract;
 use Horizon\Contracts\Database\Connections\ConnectionManagerContract;
 use Horizon\Contracts\Database\Migrations\MigrationRepositoryContract;
-use RuntimeException;
+use Horizon\Database\Exceptions\MigrationException;
 use Throwable;
 
 final class MigrationRepository implements MigrationRepositoryContract
@@ -36,7 +36,7 @@ final class MigrationRepository implements MigrationRepositoryContract
 
         foreach ($rows as $row) {
             if (! is_array($row) || ! is_string($row['filename'] ?? null)) {
-                throw new RuntimeException('Migration repository returned an invalid filename row.');
+                throw new MigrationException('Migration repository returned an invalid filename row.');
             }
 
             $files[] = $row['filename'];

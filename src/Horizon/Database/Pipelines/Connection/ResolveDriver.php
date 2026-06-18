@@ -9,8 +9,8 @@ use Horizon\Contracts\Database\Connections\Drivers\DriverContract;
 use Horizon\Database\Connections\Drivers\MySqlDriver;
 use Horizon\Database\Connections\Drivers\PostgresDriver;
 use Horizon\Database\Connections\Drivers\SqliteDriver;
+use Horizon\Database\Exceptions\DatabaseConfigurationException;
 use Horizon\Support\Pipeline\PipeInterface;
-use InvalidArgumentException;
 
 final class ResolveDriver implements PipeInterface
 {
@@ -28,7 +28,7 @@ final class ResolveDriver implements PipeInterface
         $driver = $payload['config']['driver'] ?? null;
 
         if ($driver === null) {
-            throw new InvalidArgumentException(
+            throw new DatabaseConfigurationException(
                 'Database connection config must specify a [driver].',
             );
         }
@@ -36,7 +36,7 @@ final class ResolveDriver implements PipeInterface
         $driverClass = $this->drivers[$driver] ?? null;
 
         if ($driverClass === null) {
-            throw new InvalidArgumentException(
+            throw new DatabaseConfigurationException(
                 "Unsupported database driver [$driver].",
             );
         }

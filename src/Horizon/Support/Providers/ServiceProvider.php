@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Support\Providers;
 
-use Horizon\Contracts\Arch\Application\ApplicationContract;
+use Horizon\Contracts\Arch\ApplicationContract;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
 
 abstract class ServiceProvider implements ServiceProviderContract

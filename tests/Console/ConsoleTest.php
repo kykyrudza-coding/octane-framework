@@ -16,8 +16,8 @@ use Horizon\Console\Output\OutputFormatter;
 use Horizon\Console\Output\ProgressBar;
 use Horizon\Console\Output\Spinner;
 use Horizon\Console\Output\Table;
-use Horizon\Contracts\Console\ConsoleInputContract;
-use Horizon\Contracts\Console\ConsoleOutputContract;
+use Horizon\Contracts\Console\Input\ConsoleInputContract;
+use Horizon\Contracts\Console\Output\ConsoleOutputContract;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

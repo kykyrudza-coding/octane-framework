@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Prism;
 
-use Horizon\Contracts\Prism\Compiler\PrismCompilerContract;
-use Horizon\Contracts\Prism\Engine\PrismEngineContract;
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
+use Horizon\Contracts\Prism\Prism\Engine\PrismEngineContract;
 use Horizon\Prism\RenderedView;
 use Horizon\Prism\ViewFactory;
 use InvalidArgumentException;

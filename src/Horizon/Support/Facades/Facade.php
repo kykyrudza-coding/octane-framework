@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Horizon\Support\Facades;
 
 use Horizon\Arch\Application;
-use RuntimeException;
+use Horizon\Support\Exceptions\SupportException;
 
 abstract class Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        throw new RuntimeException(
+        throw new SupportException(
             'Facade does not implement getFacadeAccessor().'
         );
     }

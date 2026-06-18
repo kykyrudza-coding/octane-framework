@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Horizon\Support\Pipeline;
 
-use Horizon\Contracts\Arch\Container\ContainerContract;
-use RuntimeException;
+use Horizon\Contracts\Arch\ContainerContract;
+use Horizon\Support\Exceptions\PipelineException;
 
 class Pipeline
 {
@@ -47,7 +47,7 @@ class Pipeline
                     : $pipe;
 
                 if (! is_object($handler) || ! is_callable([$handler, 'handle'])) {
-                    throw new RuntimeException('Pipeline pipe must resolve to an object with a callable handle method.');
+                    throw new PipelineException('Pipeline pipe must resolve to an object with a callable handle method.');
                 }
 
                 return $handler->handle($payload, $next);
@@ -65,7 +65,7 @@ class Pipeline
                     return $handler->handle($payload, static fn (mixed $value): mixed => $value);
                 }
 
-                throw new RuntimeException('Pipeline destination must be callable or resolve to a PipeInterface instance.');
+                throw new PipelineException('Pipeline destination must be callable or resolve to a PipeInterface instance.');
             }
         );
 

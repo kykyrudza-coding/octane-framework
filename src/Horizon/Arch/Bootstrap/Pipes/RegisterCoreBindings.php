@@ -7,9 +7,9 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
 use Horizon\Arch\Http\HttpKernel;
-use Horizon\Contracts\Arch\Application\ApplicationContract;
-use Horizon\Contracts\Arch\Container\ContainerContract;
-use Horizon\Contracts\Http\HttpKernel\HttpKernelContract;
+use Horizon\Contracts\Arch\ApplicationContract;
+use Horizon\Contracts\Arch\ContainerContract;
+use Horizon\Contracts\Arch\Http\HttpKernelContract;
 use Horizon\Support\Pipeline\PipeInterface;
 
 class RegisterCoreBindings implements PipeInterface

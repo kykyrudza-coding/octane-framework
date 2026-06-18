@@ -17,7 +17,8 @@ use ReflectionType;
 use ReflectionUnionType;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use RuntimeException;
+use Horizon\Docs\Exceptions\DocumentationOutputException;
+use Horizon\Docs\Exceptions\DocumentationSourceException;
 
 final class ApiDocGenerator
 {
@@ -27,7 +28,7 @@ final class ApiDocGenerator
     public function generate(string $sourcePath, string $outputPath): array
     {
         if (! is_dir($sourcePath)) {
-            throw new RuntimeException("Source path [$sourcePath] does not exist.");
+            throw new DocumentationSourceException("Source path [$sourcePath] does not exist.");
         }
 
         $classes = $this->discoverClasses($sourcePath);
@@ -989,7 +990,7 @@ code { font: 13px/1.6 "JetBrains Mono", monospace; color: #2d3250; }
     private function prepareOutputDirectory(string $outputPath): void
     {
         if (! is_dir($outputPath) && ! mkdir($outputPath, 0775, true) && ! is_dir($outputPath)) {
-            throw new RuntimeException("Unable to create output path [$outputPath].");
+            throw new DocumentationOutputException("Unable to create output path [$outputPath].");
         }
     }
 
@@ -997,7 +998,7 @@ code { font: 13px/1.6 "JetBrains Mono", monospace; color: #2d3250; }
     {
         $directory = dirname($path);
         if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
-            throw new RuntimeException("Unable to create directory [$directory].");
+            throw new DocumentationOutputException("Unable to create directory [$directory].");
         }
 
         file_put_contents($path, $contents);

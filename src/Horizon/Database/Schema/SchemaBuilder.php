@@ -7,7 +7,7 @@ namespace Horizon\Database\Schema;
 use Horizon\Contracts\Database\Connections\ConnectionContract;
 use Horizon\Contracts\Database\Connections\ConnectionManagerContract;
 use Horizon\Contracts\Database\Schema\SchemaBuilderContract;
-use Horizon\Contracts\Database\Schema\SchemaCompilerContract;
+use Horizon\Contracts\Database\Schema\Compilers\SchemaCompilerContract;
 use Throwable;
 
 final readonly class SchemaBuilder implements SchemaBuilderContract

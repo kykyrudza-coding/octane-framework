@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Prism\Engine;
 
-use Horizon\Contracts\Prism\Compiler\PrismCompilerContract;
-use Horizon\Contracts\Prism\Component\ComponentResolverContract;
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentResolverContract;
 use Horizon\Prism\Prism\Engine\PrismEngine;
 use PHPUnit\Framework\TestCase;
 

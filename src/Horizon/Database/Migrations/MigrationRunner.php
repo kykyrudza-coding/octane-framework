@@ -11,8 +11,8 @@ use Horizon\Database\Pipelines\Migration\FilterPendingMigrations;
 use Horizon\Database\Pipelines\Migration\ResolveMigrationFiles;
 use Horizon\Database\Pipelines\Migration\RunMigrations;
 use Horizon\Database\Pipelines\Migration\StoreMigrationRecord;
+use Horizon\Database\Exceptions\MigrationException;
 use Horizon\Support\Pipeline\Pipeline;
-use RuntimeException;
 
 final readonly class MigrationRunner implements MigrationRunnerContract
 {
@@ -78,7 +78,7 @@ final readonly class MigrationRunner implements MigrationRunnerContract
         $migration = require $path.'/'.$file;
 
         if (! $migration instanceof Migratable) {
-            throw new RuntimeException(
+            throw new MigrationException(
                 "Migration [{$file}] must implement Migratable.",
             );
         }

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Horizon\Database\Console;
 
 use Horizon\Console\Command;
-use Horizon\Contracts\Console\ConsoleInputContract;
-use Horizon\Contracts\Console\ConsoleOutputContract;
-use Horizon\Contracts\Database\Seeder\SeederContract;
+use Horizon\Contracts\Console\Input\ConsoleInputContract;
+use Horizon\Contracts\Console\Output\ConsoleOutputContract;
+use Horizon\Contracts\Database\Seeders\SeederContract;
 
 final class SeedCommand extends Command
 {

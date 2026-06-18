@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism\Compiler;
 
-use Horizon\Contracts\Prism\Compiler\DirectiveContract;
-use Horizon\Contracts\Prism\Compiler\DirectiveRegistryContract;
-use InvalidArgumentException;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveRegistryContract;
+use Horizon\Prism\Exceptions\DirectiveException;
 
 class DirectiveRegistry implements DirectiveRegistryContract
 {
@@ -23,7 +23,7 @@ class DirectiveRegistry implements DirectiveRegistryContract
         }
 
         if ($name === null) {
-            throw new InvalidArgumentException(
+            throw new DirectiveException(
                 'Directive name cannot be null when registering a callable.'
             );
         }

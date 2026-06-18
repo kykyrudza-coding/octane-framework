@@ -8,7 +8,7 @@ use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Request\RequestContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
 use Horizon\Contracts\Routing\RouteDtoContract;
-use RuntimeException;
+use Horizon\Http\Exceptions\RequestContextException;
 
 final class RequestContext implements RequestContextContract
 {
@@ -56,7 +56,7 @@ final class RequestContext implements RequestContextContract
     public function getResponse(): ResponseContract
     {
         if ($this->response === null) {
-            throw new RuntimeException('Response has not been set on the request context.');
+            throw new RequestContextException('Response has not been set on the request context.');
         }
 
         return $this->response;

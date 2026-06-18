@@ -6,8 +6,8 @@ namespace Horizon\Database\Pipelines\Migration;
 
 use Closure;
 use Horizon\Contracts\Database\Migrations\Migratable;
+use Horizon\Database\Exceptions\MigrationException;
 use Horizon\Support\Pipeline\PipeInterface;
-use RuntimeException;
 
 final class RunMigrations implements PipeInterface
 {
@@ -22,7 +22,7 @@ final class RunMigrations implements PipeInterface
             $migration = require $path.'/'.$file;
 
             if (! $migration instanceof Migratable) {
-                throw new RuntimeException(
+                throw new MigrationException(
                     "Migration [$file] must implement Migratable.",
                 );
             }

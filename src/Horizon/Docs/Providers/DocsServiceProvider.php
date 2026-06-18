@@ -8,8 +8,8 @@ use Horizon\Contracts\Console\CommandRegistryContract;
 use Horizon\Contracts\Routing\RouteRegistrarContract;
 use Horizon\Docs\Console\ApiDocsGenerateCommand;
 use Horizon\Docs\Controllers\ApiDocsController;
+use Horizon\Docs\Exceptions\DocsBindingException;
 use Horizon\Support\Providers\ServiceProvider;
-use RuntimeException;
 
 final class DocsServiceProvider extends ServiceProvider
 {
@@ -25,7 +25,7 @@ final class DocsServiceProvider extends ServiceProvider
     {
         $routes = $this->app->make(RouteRegistrarContract::class);
         if (! $routes instanceof RouteRegistrarContract) {
-            throw new RuntimeException('Route registrar binding must resolve to a RouteRegistrarContract instance.');
+            throw new DocsBindingException('Route registrar binding must resolve to a RouteRegistrarContract instance.');
         }
 
         $routes->get('/_octane/api', [ApiDocsController::class, 'index'])->name('octane.api.index');
@@ -36,7 +36,7 @@ final class DocsServiceProvider extends ServiceProvider
     {
         $commands = $this->app->make(CommandRegistryContract::class);
         if (! $commands instanceof CommandRegistryContract) {
-            throw new RuntimeException('Command registry binding must resolve to a CommandRegistryContract instance.');
+            throw new DocsBindingException('Command registry binding must resolve to a CommandRegistryContract instance.');
         }
 
         $commands->register(ApiDocsGenerateCommand::class);

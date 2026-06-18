@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Horizon\Database\Pipelines\Connection;
 
 use Closure;
+use Horizon\Database\Exceptions\DatabaseConfigurationException;
 use Horizon\Support\Pipeline\PipeInterface;
-use InvalidArgumentException;
 
 final class BuildConnectionConfig implements PipeInterface
 {
@@ -16,7 +16,7 @@ final class BuildConnectionConfig implements PipeInterface
     {
         foreach (self::REQUIRED as $key) {
             if (empty($payload['config'][$key])) {
-                throw new InvalidArgumentException(
+                throw new DatabaseConfigurationException(
                     "Database connection config missing required field [$key].",
                 );
             }

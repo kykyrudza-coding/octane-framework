@@ -6,9 +6,9 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
+use Horizon\Arch\Exceptions\BootstrapException;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
 use Horizon\Support\Pipeline\PipeInterface;
-use RuntimeException;
 
 class RegisterProviders implements PipeInterface
 {
@@ -44,7 +44,7 @@ class RegisterProviders implements PipeInterface
         }
 
         if (! is_array($providers)) {
-            throw new RuntimeException('Configured providers must be an array of service provider class names.');
+            throw new BootstrapException('Configured providers must be an array of service provider class names.');
         }
 
         return $this->filterProviderClasses($providers);

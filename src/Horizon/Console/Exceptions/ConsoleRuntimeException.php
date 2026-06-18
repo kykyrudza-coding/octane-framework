@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Horizon\Console\Exceptions;
+
+class ConsoleRuntimeException extends ConsoleException
+{
+}

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Horizon\Contracts\Console;
 
+use Horizon\Contracts\Console\Input\ConsoleInputContract;
+use Horizon\Contracts\Console\Output\ConsoleOutputContract;
+
 interface CommandContract
 {
     public function name(): string;

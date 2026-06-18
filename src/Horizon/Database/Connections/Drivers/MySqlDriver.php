@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Horizon\Database\Connections\Drivers;
 
 use Horizon\Contracts\Database\Connections\Drivers\DriverContract;
+use Horizon\Database\Exceptions\DatabaseConnectionException;
 use PDO;
 use Pdo\Mysql;
 use PDOException;
-use RuntimeException;
 
 final class MySqlDriver implements DriverContract
 {
@@ -31,7 +31,7 @@ final class MySqlDriver implements DriverContract
                 $this->buildOptions($config)
             );
         } catch (PDOException $e) {
-            throw new RuntimeException(
+            throw new DatabaseConnectionException(
                 "MySQL connection failed: {$e->getMessage()}",
                 previous: $e
             );

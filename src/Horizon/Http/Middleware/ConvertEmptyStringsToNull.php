@@ -8,7 +8,7 @@ use Closure;
 use Horizon\Contracts\Http\Middleware\MiddlewareContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
-use RuntimeException;
+use Horizon\Http\Exceptions\MiddlewareException;
 
 class ConvertEmptyStringsToNull implements MiddlewareContract
 {
@@ -23,7 +23,7 @@ class ConvertEmptyStringsToNull implements MiddlewareContract
 
         $response = $next($context);
         if (! $response instanceof ResponseContract) {
-            throw new RuntimeException('Middleware chain must return a ResponseContract instance.');
+            throw new MiddlewareException('Middleware chain must return a ResponseContract instance.');
         }
 
         return $response;

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Horizon\Arch;
 
-use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Arch\Exceptions\BindingResolutionException;
+use Horizon\Contracts\Arch\ContainerContract;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionNamedType;
 use ReflectionParameter;
-use RuntimeException;
 
 class Container implements ContainerContract
 {
@@ -109,18 +109,18 @@ class Container implements ContainerContract
         }
 
         if (! class_exists($concrete)) {
-            throw new RuntimeException("Class $concrete does not exist.");
+            throw new BindingResolutionException("Class $concrete does not exist.");
         }
 
         $reflection = new ReflectionClass($concrete);
 
         if (! $reflection->isInstantiable()) {
-            throw new RuntimeException("Class $concrete is not instantiable.");
+            throw new BindingResolutionException("Class $concrete is not instantiable.");
         }
 
         if (isset($this->resolving[$concrete])) {
             $chain = implode(' → ', array_keys($this->resolving));
-            throw new RuntimeException(
+            throw new BindingResolutionException(
                 "Circular dependency detected: $chain → $concrete"
             );
         }
@@ -157,7 +157,7 @@ class Container implements ContainerContract
                 return $param->getDefaultValue();
             }
 
-            throw new RuntimeException(
+            throw new BindingResolutionException(
                 "Cannot resolve parameter \${$param->getName()} — no type hint."
             );
         }
@@ -171,7 +171,7 @@ class Container implements ContainerContract
                 return null;
             }
 
-            throw new RuntimeException(
+            throw new BindingResolutionException(
                 "Cannot resolve union/intersection type for parameter \${$param->getName()}."
             );
         }
@@ -191,7 +191,7 @@ class Container implements ContainerContract
         }
 
         if (in_array($typeName, ['int', 'float', 'string', 'bool', 'array'])) {
-            throw new RuntimeException(
+            throw new BindingResolutionException(
                 "Cannot resolve primitive parameter \${$param->getName()} of type $typeName."
             );
         }

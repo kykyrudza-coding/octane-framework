@@ -6,9 +6,9 @@ namespace Horizon\Database\Connections;
 
 use Closure;
 use Horizon\Contracts\Database\Connections\ConnectionContract;
+use Horizon\Database\Exceptions\DatabaseConnectionException;
 use PDO;
 use PDOException;
-use RuntimeException;
 use Throwable;
 
 final class Connection implements ConnectionContract
@@ -174,7 +174,7 @@ final class Connection implements ConnectionContract
         try {
             $result = $callback($this->pdo, $query, $bindings);
         } catch (PDOException $e) {
-            throw new RuntimeException(
+            throw new DatabaseConnectionException(
                 "Database query failed: {$e->getMessage()}\nQuery: {$query}",
                 previous: $e,
             );

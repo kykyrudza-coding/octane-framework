@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Horizon\Exception\Providers;
 
 use Horizon\Support\Providers\ServiceProvider;
-use Horizon\Contracts\Arch\Container\ContainerContract;
-use Horizon\Contracts\Exception\ErrorRendererContract;
-use Horizon\Contracts\Exception\ExceptionHandlerContract;
+use Horizon\Contracts\Arch\ContainerContract;
+use Horizon\Contracts\Exception\Renderers\ErrorRendererContract;
+use Horizon\Contracts\Exception\HandlerContract;
+use Horizon\Exception\Exceptions\RendererResolutionException;
 use Horizon\Exception\Handler;
 use Horizon\Exception\Renderers\ErrorRenderer;
-use RuntimeException;
 
 class ExceptionServiceProvider extends ServiceProvider
 {
@@ -22,11 +22,11 @@ class ExceptionServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
-            ExceptionHandlerContract::class,
+            HandlerContract::class,
             function (ContainerContract $app) {
                 $renderer = $app->make(ErrorRendererContract::class);
                 if (! $renderer instanceof ErrorRendererContract) {
-                    throw new RuntimeException('Error renderer binding must resolve to an ErrorRendererContract instance.');
+                    throw new RendererResolutionException('Error renderer binding must resolve to an ErrorRendererContract instance.');
                 }
 
                 return new Handler(

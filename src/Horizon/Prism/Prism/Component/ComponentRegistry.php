@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism\Component;
 
-use Horizon\Contracts\Prism\Component\ComponentContract;
-use Horizon\Contracts\Prism\Component\ComponentRegistryContract;
-use InvalidArgumentException;
+use Horizon\Contracts\Prism\Prism\Component\ComponentContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentRegistryContract;
+use Horizon\Prism\Exceptions\ComponentException;
 
 final class ComponentRegistry implements ComponentRegistryContract
 {
@@ -16,7 +16,7 @@ final class ComponentRegistry implements ComponentRegistryContract
     public function register(ComponentContract $component): void
     {
         if (!method_exists($component, 'name')) {
-            throw new InvalidArgumentException(
+            throw new ComponentException(
                 'Component must implement a name() method to be registered.'
             );
         }
@@ -32,7 +32,7 @@ final class ComponentRegistry implements ComponentRegistryContract
     public function registerAlias(string $alias, string $class): void
     {
         if (!class_exists($class)) {
-            throw new InvalidArgumentException("Component class '$class' does not exist.");
+            throw new ComponentException("Component class '$class' does not exist.");
         }
 
         $this->components[$alias] = new $class();

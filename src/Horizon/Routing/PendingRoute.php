@@ -8,6 +8,7 @@ use Closure;
 use Horizon\Contracts\Routing\PendingRouteContract;
 use Horizon\Contracts\Routing\RouteDtoContract;
 use Horizon\Contracts\Routing\RouterContract;
+use Horizon\Routing\Exceptions\RouteRegistrationException;
 
 final class PendingRoute implements PendingRouteContract
 {
@@ -63,7 +64,7 @@ final class PendingRoute implements PendingRouteContract
     public function register(): RouteDtoContract
     {
         if ($this->registered) {
-            throw new \LogicException('Route has already been registered.');
+            throw new RouteRegistrationException('Route has already been registered.');
         }
 
         $this->registered = true;

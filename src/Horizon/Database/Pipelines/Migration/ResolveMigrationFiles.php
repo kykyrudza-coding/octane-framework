@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Horizon\Database\Pipelines\Migration;
 
 use Closure;
+use Horizon\Database\Exceptions\MigrationException;
 use Horizon\Support\Pipeline\PipeInterface;
-use RuntimeException;
 
 final class ResolveMigrationFiles implements PipeInterface
 {
@@ -15,7 +15,7 @@ final class ResolveMigrationFiles implements PipeInterface
         $path = $payload['path'];
 
         if (! is_dir($path)) {
-            throw new RuntimeException(
+            throw new MigrationException(
                 "Migrations directory not found: [$path].",
             );
         }

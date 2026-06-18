@@ -187,3 +187,35 @@ Accepted config key spelling:
 The user specifically prefers `halcyon.metadata.cache`, not `halcyon.metadata_cache`.
 
 In development, model metadata cache should be easy to disable.
+
+## Implementation Update
+
+Halcyon is now present as an implemented framework module, but it is still a mapper/hydration layer, not a query API.
+
+Implemented surfaces:
+
+- `Horizon\Halcyon\Model\Model` as the base model with loaded relation storage.
+- `#[Table]` and `#[Column]` attributes for table and column mapping.
+- `MetadataParser`, `MetadataRepository`, `ModelMetadata`, `PropertyMetadata`, and `RelationMetadata`.
+- File-backed metadata cache through `FileMetadataCache`.
+- `Hydrator` for row-array to model-object hydration.
+- Built-in casts for `CarbonTimestamp`, `CarbonDateTime`, and backed enums.
+- Relation descriptors: `HasMany`, `HasOne`, `BelongsTo`, `BelongsToMany`.
+- `Halcyon` registry service and facade for observers, scopes, and morph map configuration.
+
+Current important rules:
+
+- Model methods such as `hidden()`, `casts()`, `observers()`, and `scopes()` may stay protected static methods. The metadata parser reads them through reflection.
+- Relation methods are protected instance methods returning relation objects. The method name is the relation name when the relation object does not define an explicit name.
+- `Relation::hasMany(...)`, `hasOne(...)`, `belongsTo(...)`, and `belongsToMany(...)` support named arguments without forcing a `name` argument.
+- `Hydrator::hydrate()` returns `ItemsList<Model>`.
+- `MetadataRepository` caches parsed `ModelMetadata` only when metadata cache is enabled and a cache backend exists.
+- Halcyon does not lazy-load relations yet. Accessing an unloaded relation throws `RelationNotLoadedException`.
+
+Implemented integration boundary:
+
+- QueryBuilder owns SQL and raw row retrieval.
+- Halcyon owns model metadata and hydration.
+- `QueryBuilder::table('users')` keeps returning raw rows.
+- `QueryBuilder::for(User::class)` resolves Halcyon metadata, selects the metadata table, executes the query, and hydrates rows into `ItemsList<User>`.
+- The boundary is `QueryResultMapperContract`; QueryBuilder does not depend directly on Halcyon classes.

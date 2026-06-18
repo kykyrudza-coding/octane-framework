@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Database\Seeders;
 
-use Horizon\Contracts\Database\Seeder\SeederContract;
+use Horizon\Contracts\Database\Seeders\SeederContract;
 
 abstract class Seeder implements SeederContract
 {

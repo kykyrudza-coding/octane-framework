@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Horizon\QueryBuilder;
 
+use Horizon\Contracts\QueryBuilder\QueryResultMapperContract;
 use Horizon\QueryBuilder\Clauses\JoinClause;
 use Horizon\QueryBuilder\Clauses\LimitClause;
 use Horizon\QueryBuilder\Clauses\OrderByClause;
 use Horizon\QueryBuilder\Clauses\WhereClause;
 use Horizon\QueryBuilder\Exceptions\QueryBuilderException;
 use Horizon\QueryBuilder\Grammar\QueryGrammar;
+use Horizon\QueryBuilder\Results\RawQueryResultMapper;
 use Horizon\QueryBuilder\Results\QueryRow;
 use Horizon\Support\ItemsList;
 use PDO;
@@ -26,6 +28,9 @@ use ReflectionException;
 final class QueryBuilder
 {
     private ?string $table = null;
+
+    /** @var class-string|null */
+    private ?string $model = null;
 
     /** @var list<string> */
     private array $columns = ['*'];
@@ -47,6 +52,7 @@ final class QueryBuilder
     public function __construct(
         private readonly PDO $connection,
         private readonly QueryGrammar $grammar,
+        private readonly ?QueryResultMapperContract $resultMapper = null,
     ) {}
 
     // -------------------------------------------------------------------------
@@ -57,6 +63,7 @@ final class QueryBuilder
     {
         $clone = clone $this;
         $clone->table = $table;
+        $clone->model = null;
 
         return $clone;
     }
@@ -70,10 +77,18 @@ final class QueryBuilder
      */
     public function for(string $model): self
     {
-        $short = new ReflectionClass($model)->getShortName();
-        $table = $this->classNameToTable($short);
+        $table = $this->mapper()->tableFor($model);
 
-        return $this->table($table);
+        if ($table === null) {
+            $short = new ReflectionClass($model)->getShortName();
+            $table = $this->classNameToTable($short);
+        }
+
+        $clone = clone $this;
+        $clone->table = $table;
+        $clone->model = $model;
+
+        return $clone;
     }
 
     // -------------------------------------------------------------------------
@@ -100,8 +115,17 @@ final class QueryBuilder
     // WHERE
     // -------------------------------------------------------------------------
 
-    public function where(string $column, string $operator, mixed $value, string $boolean = 'AND'): self
-    {
+    public function where(
+        string $column,
+        mixed $operator = null,
+        mixed $value = null,
+        string $boolean = 'AND',
+    ): QueryBuilder {
+        if (func_num_args() === 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+
         $clone = clone $this;
         $clone->wheres[] = new WhereClause($column, $operator, $value, $boolean);
         $clone->bindings[] = $value;
@@ -182,7 +206,7 @@ final class QueryBuilder
     // READS
     // -------------------------------------------------------------------------
 
-    /** @return ItemsList<int, QueryRow> */
+    /** @return ItemsList<int, mixed> */
     public function get(): ItemsList
     {
         $sql = $this->grammar->compileSelect(
@@ -200,15 +224,17 @@ final class QueryBuilder
         /** @var list<array<string, mixed>> $rows */
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return ItemsList::from(
+        $rows = ItemsList::from(
             array_map(
                 static fn (array $row): QueryRow => new QueryRow($row),
                 $rows,
             ),
         );
+
+        return $this->mapper()->map($this->model, $rows);
     }
 
-    /** @return QueryRow|null */
+    /** @return mixed|null */
     public function first(): mixed
     {
         $builder = $this->limitClause === null ? $this->limit(1) : $this;
@@ -315,6 +341,11 @@ final class QueryBuilder
         }
 
         return $this->table;
+    }
+
+    private function mapper(): QueryResultMapperContract
+    {
+        return $this->resultMapper ?? new RawQueryResultMapper();
     }
 
     private function classNameToTable(string $className): string

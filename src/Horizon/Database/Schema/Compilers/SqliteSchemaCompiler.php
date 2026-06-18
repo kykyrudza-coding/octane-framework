@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Horizon\Database\Schema\Compilers;
 
-use Horizon\Contracts\Database\Schema\SchemaCompilerContract;
-use InvalidArgumentException;
+use Horizon\Contracts\Database\Schema\Compilers\SchemaCompilerContract;
+use Horizon\Database\Exceptions\SchemaException;
 
 final class SqliteSchemaCompiler implements SchemaCompilerContract
 {
     public function compileCreate(string $table, array $columns): string
     {
         $definitions = [];
+        $constraints = [];
 
         foreach ($columns as $column) {
             $definition = $column->toDefinition();
@@ -34,7 +35,7 @@ final class SqliteSchemaCompiler implements SchemaCompilerContract
             $definitions[] = $this->compileColumn($definition);
 
             if ($definition['references'] && $definition['on']) {
-                $definitions[] = sprintf(
+                $constraints[] = sprintf(
                     'FOREIGN KEY ("%s") REFERENCES "%s" ("%s") ON DELETE %s ON UPDATE %s',
                     $definition['name'],
                     $definition['on'],
@@ -45,10 +46,12 @@ final class SqliteSchemaCompiler implements SchemaCompilerContract
             }
         }
 
+        $all = array_merge($definitions, $constraints);
+
         return sprintf(
             "CREATE TABLE \"%s\" (\n  %s\n)",
             $table,
-            implode(",\n  ", $definitions),
+            implode(",\n  ", $all),
         );
     }
 
@@ -124,7 +127,7 @@ final class SqliteSchemaCompiler implements SchemaCompilerContract
             'json'        => 'TEXT',
             'date',
             'timestamp'   => 'TEXT',
-            default       => throw new InvalidArgumentException(
+            default       => throw new SchemaException(
                 "Unknown column type [{$definition['type']}].",
             ),
         };

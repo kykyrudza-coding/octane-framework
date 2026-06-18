@@ -6,8 +6,8 @@ namespace Horizon\Console;
 
 use Horizon\Console\Output\OutputStyle;
 use Horizon\Contracts\Console\CommandContract;
-use Horizon\Contracts\Console\ConsoleInputContract;
-use Horizon\Contracts\Console\ConsoleOutputContract;
+use Horizon\Contracts\Console\Input\ConsoleInputContract;
+use Horizon\Contracts\Console\Output\ConsoleOutputContract;
 
 abstract class Command implements CommandContract
 {

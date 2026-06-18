@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Horizon\Prism\Providers;
 
 use Horizon\Support\Providers\ServiceProvider;
-use Horizon\Contracts\Prism\Compiler\DirectiveRegistryContract;
-use Horizon\Contracts\Prism\Compiler\PrismCompilerContract;
-use Horizon\Contracts\Prism\Component\ComponentRegistryContract;
-use Horizon\Contracts\Prism\Component\ComponentResolverContract;
-use Horizon\Contracts\Prism\Engine\PrismEngineContract;
-use Horizon\Contracts\Prism\PrismContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveRegistryContract;
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentRegistryContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentResolverContract;
+use Horizon\Contracts\Prism\Prism\Engine\PrismEngineContract;
+use Horizon\Contracts\Prism\Prism\PrismContract;
 use Horizon\Contracts\Prism\ViewFactoryContract;
 use Horizon\Prism\Prism\Compiler\DirectiveRegistry;
 use Horizon\Prism\Prism\Compiler\Directives\Conditions\ElseDirective;
@@ -161,7 +161,7 @@ class PrismServiceProvider extends ServiceProvider
     // ─── Built-in directives ──────────────────────────────────────────────
 
     /**
-     * @return list<\Horizon\Contracts\Prism\Compiler\DirectiveContract>
+     * @return list<\Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract>
      */
     private function builtinDirectives(): array
     {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Prism\Compiler;
 
-use Horizon\Contracts\Prism\Compiler\DirectiveContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract;
 use Horizon\Prism\Prism\Compiler\DirectiveRegistry;
 use PHPUnit\Framework\TestCase;
 

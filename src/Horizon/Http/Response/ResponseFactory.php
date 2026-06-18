@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Horizon\Http\Response;
 
 use Horizon\Arch\Application;
+use Horizon\Arch\Exceptions\BindingResolutionException;
 use Horizon\Contracts\Http\Response\ResponseContract;
 use Horizon\Contracts\Http\Response\ResponseFactoryContract;
 use Horizon\Contracts\Prism\ViewFactoryContract;
-use RuntimeException;
 
 class ResponseFactory implements ResponseFactoryContract
 {
@@ -61,7 +61,7 @@ class ResponseFactory implements ResponseFactoryContract
         $factory = Application::getInstance()->make(ViewFactoryContract::class);
 
         if (! $factory instanceof ViewFactoryContract) {
-            throw new RuntimeException(
+            throw new BindingResolutionException(
                 'View factory binding must resolve to a ViewFactoryContract instance.'
             );
         }

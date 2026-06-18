@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Horizon\Arch\Http\Pipes;
 
 use Closure;
-use Horizon\Contracts\Arch\Container\ContainerContract;
-use Horizon\Contracts\Http\Middleware\MiddlewareCollectionContract;
+use Horizon\Contracts\Arch\ContainerContract;
+use Horizon\Contracts\Http\Collection\MiddlewareCollectionContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Support\Pipeline\PipeInterface;
 use Horizon\Support\Pipeline\Pipeline;

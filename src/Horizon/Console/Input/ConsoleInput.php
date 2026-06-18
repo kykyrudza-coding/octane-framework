@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Console\Input;
 
-use Horizon\Contracts\Console\ConsoleInputContract;
+use Horizon\Contracts\Console\Input\ConsoleInputContract;
 
 final readonly class ConsoleInput implements ConsoleInputContract
 {

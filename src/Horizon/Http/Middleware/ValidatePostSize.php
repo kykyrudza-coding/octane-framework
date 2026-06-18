@@ -8,7 +8,7 @@ use Closure;
 use Horizon\Contracts\Http\Middleware\MiddlewareContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Http\Response\ResponseContract;
-use RuntimeException;
+use Horizon\Http\Exceptions\MiddlewareException;
 
 class ValidatePostSize implements MiddlewareContract
 {
@@ -20,12 +20,12 @@ class ValidatePostSize implements MiddlewareContract
         $contentLength = is_numeric($contentLength) ? (int) $contentLength : 0;
 
         if ($max && $contentLength > $max) {
-            throw new RuntimeException('Request entity too large.');
+            throw new MiddlewareException('Request entity too large.', 413);
         }
 
         $response = $next($context);
         if (! $response instanceof ResponseContract) {
-            throw new RuntimeException('Middleware chain must return a ResponseContract instance.');
+            throw new MiddlewareException('Middleware chain must return a ResponseContract instance.');
         }
 
         return $response;

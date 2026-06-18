@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Horizon\QueryBuilder\Providers;
 
 use Horizon\Contracts\Database\Connections\ConnectionManagerContract;
+use Horizon\Contracts\QueryBuilder\QueryResultMapperContract;
+use Horizon\QueryBuilder\Exceptions\QueryBuilderConnectionException;
 use Horizon\QueryBuilder\QueryBuilderFactory;
+use Horizon\QueryBuilder\Results\RawQueryResultMapper;
 use Horizon\Support\Providers\ServiceProvider;
 use PDO;
-use RuntimeException;
 
 final class QueryBuilderServiceProvider extends ServiceProvider
 {
@@ -18,19 +20,27 @@ final class QueryBuilderServiceProvider extends ServiceProvider
             $manager = $this->app->make(ConnectionManagerContract::class);
 
             if (! $manager instanceof ConnectionManagerContract) {
-                throw new RuntimeException('Connection manager binding must resolve to a ConnectionManagerContract instance.');
+                throw new QueryBuilderConnectionException('Connection manager binding must resolve to a ConnectionManagerContract instance.');
             }
 
             $connection = $manager->connection();
 
             if (! method_exists($connection, 'getPdo')) {
-                throw new RuntimeException('Database connection must expose a PDO instance for QueryBuilder.');
+                throw new QueryBuilderConnectionException('Database connection must expose a PDO instance for QueryBuilder.');
             }
 
             /** @var PDO $pdo */
             $pdo = $connection->getPdo();
 
-            return new QueryBuilderFactory($pdo, $connection->getDriverName());
+            $mapper = $this->app->has(QueryResultMapperContract::class)
+                ? $this->app->make(QueryResultMapperContract::class)
+                : new RawQueryResultMapper();
+
+            if (! $mapper instanceof QueryResultMapperContract) {
+                $mapper = new RawQueryResultMapper();
+            }
+
+            return new QueryBuilderFactory($pdo, $connection->getDriverName(), $mapper);
         });
     }
 

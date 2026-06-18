@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Horizon\Support\Hashing;
 
 use Horizon\Contracts\Support\Hashing\HasherContract;
-use RuntimeException;
+use Horizon\Support\Exceptions\HashingException;
 
 final readonly class Argon2Hasher implements HasherContract
 {
@@ -24,7 +24,7 @@ final readonly class Argon2Hasher implements HasherContract
         ]);
 
         if ($hash === false) {
-            throw new RuntimeException('Argon2 hashing not supported.');
+            throw new HashingException('Argon2 hashing not supported.');
         }
 
         return $hash;

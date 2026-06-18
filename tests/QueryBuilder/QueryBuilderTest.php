@@ -5,6 +5,13 @@ declare(strict_types=1);
 namespace Tests\QueryBuilder;
 
 use Horizon\QueryBuilder\Exceptions\QueryBuilderException;
+use Horizon\Halcyon\Hydration\Hydrator;
+use Horizon\Halcyon\Metadata\MetadataParser;
+use Horizon\Halcyon\Metadata\MetadataRepository;
+use Horizon\Halcyon\Model\Attributes\Column;
+use Horizon\Halcyon\Model\Attributes\Table;
+use Horizon\Halcyon\Model\Model;
+use Horizon\Halcyon\Query\HalcyonResultMapper;
 use Horizon\QueryBuilder\QueryBuilder;
 use Horizon\QueryBuilder\QueryBuilderFactory;
 use Horizon\QueryBuilder\Results\QueryRow;
@@ -67,6 +74,43 @@ class QueryBuilderTest extends TestCase
         $this->assertInstanceOf(ItemsList::class, $users);
         $this->assertInstanceOf(QueryRow::class, $users->first());
         $this->assertNotInstanceOf(stdClass::class, $users->first());
+    }
+
+    public function test_table_query_stays_raw_when_halcyon_mapper_is_available(): void
+    {
+        $factory = new QueryBuilderFactory($this->pdo, 'sqlite', $this->halcyonMapper());
+
+        $user = $factory->forTable('users')->where('id', '=', 1)->first();
+
+        $this->assertInstanceOf(QueryRow::class, $user);
+        $this->assertSame('Ada', $user->name);
+    }
+
+    public function test_for_model_uses_halcyon_metadata_and_hydrates_models(): void
+    {
+        $factory = new QueryBuilderFactory($this->pdo, 'sqlite', $this->halcyonMapper());
+
+        $users = $factory->forModel(QueryBuilderHalcyonUser::class)
+            ->where('active', '=', 1)
+            ->get();
+
+        $this->assertInstanceOf(ItemsList::class, $users);
+        $this->assertCount(1, $users);
+        $this->assertInstanceOf(QueryBuilderHalcyonUser::class, $users->first());
+        $this->assertSame('Ada', $users->first()->name);
+        $this->assertSame('2026-01-01', $users->first()->createdAt);
+    }
+
+    public function test_first_for_model_returns_single_hydrated_model(): void
+    {
+        $factory = new QueryBuilderFactory($this->pdo, 'sqlite', $this->halcyonMapper());
+
+        $user = $factory->forModel(QueryBuilderHalcyonUser::class)
+            ->where('id', '=', 2)
+            ->first();
+
+        $this->assertInstanceOf(QueryBuilderHalcyonUser::class, $user);
+        $this->assertSame('Bob', $user->name);
     }
 
     public function test_query_row_supports_property_array_and_get_access(): void
@@ -188,6 +232,33 @@ class QueryBuilderTest extends TestCase
 
         $this->factory->make()->get();
     }
+
+    private function halcyonMapper(): HalcyonResultMapper
+    {
+        return new HalcyonResultMapper(
+            metadata: new MetadataRepository(
+                parser: new MetadataParser(),
+                cache: null,
+                cacheEnabled: false,
+            ),
+            hydrator: new Hydrator(),
+        );
+    }
 }
 
 final class QueryBuilderUserProfile {}
+
+#[Table('users')]
+final class QueryBuilderHalcyonUser extends Model
+{
+    public int $id;
+
+    public string $name;
+
+    public string $email;
+
+    public int $active;
+
+    #[Column('created_at')]
+    public ?string $createdAt = null;
+}

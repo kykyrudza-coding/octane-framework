@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Prism\Engine;
 
-use Horizon\Contracts\Prism\Compiler\PrismCompilerContract;
-use Horizon\Contracts\Prism\Component\ComponentResolverContract;
-use Horizon\Contracts\Prism\Engine\PrismEngineContract;
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
+use Horizon\Contracts\Prism\Prism\Component\ComponentResolverContract;
+use Horizon\Contracts\Prism\Prism\Engine\PrismEngineContract;
 use Horizon\Prism\Prism\Engine\TemplateContext;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

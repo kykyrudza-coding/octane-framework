@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Support;
 
-use BadMethodCallException;
+use Horizon\Support\Exceptions\MacroException;
 
 trait Macroable
 {
@@ -23,7 +23,7 @@ trait Macroable
     public static function __callStatic(string $name, array $arguments)
     {
         if (!static::hasMacro($name)) {
-            throw new BadMethodCallException('Method ' . $name . ' does not exist.');
+            throw new MacroException('Method ' . $name . ' does not exist.');
         }
 
         return (static::$macros[$name])(...$arguments);
@@ -32,7 +32,7 @@ trait Macroable
     public function __call(string $name, array $arguments)
     {
         if (!static::hasMacro($name)) {
-            throw new BadMethodCallException('Method ' . $name . ' does not exist.');
+            throw new MacroException('Method ' . $name . ' does not exist.');
         }
 
         return (static::$macros[$name])(...$arguments);

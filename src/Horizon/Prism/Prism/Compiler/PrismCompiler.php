@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism\Compiler;
 
-use Horizon\Contracts\Prism\Compiler\DirectiveContract;
-use Horizon\Contracts\Prism\Compiler\DirectiveRegistryContract;
-use Horizon\Contracts\Prism\Compiler\PrismCompilerContract;
-use InvalidArgumentException;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveRegistryContract;
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
+use Horizon\Prism\Exceptions\TemplateCompilationException;
 
 final readonly class PrismCompiler implements PrismCompilerContract
 {
@@ -20,7 +20,7 @@ final readonly class PrismCompiler implements PrismCompilerContract
     public function compile(string $path): string
     {
         if (!file_exists($path)) {
-            throw new InvalidArgumentException("File $path does not exist.");
+            throw new TemplateCompilationException("File $path does not exist.");
         }
 
         $compiled = $this->compiledPath($path);

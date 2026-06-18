@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Console\Output;
 
-use Horizon\Contracts\Console\ConsoleOutputContract;
+use Horizon\Contracts\Console\Output\ConsoleOutputContract;
 
 final class Table
 {

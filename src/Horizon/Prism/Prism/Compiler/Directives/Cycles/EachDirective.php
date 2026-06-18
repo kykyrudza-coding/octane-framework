@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism\Compiler\Directives\Cycles;
 
-use Horizon\Contracts\Prism\Compiler\DirectiveContract;
+use Horizon\Contracts\Prism\Prism\Compiler\DirectiveContract;
 
 final class EachDirective implements DirectiveContract
 {

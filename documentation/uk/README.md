@@ -62,3 +62,12 @@
 
 > Важливо: класи або файли-заготовки без робочої реалізації не подаються як
 > готовий API. Їхній стан винесено до розділу reference.
+
+## Halcyon �� QueryBuilder
+
+- [Halcyon ORM](halcyon/README.md)
+- [Halcyon metadata](halcyon/metadata.md)
+- [Halcyon hydration](halcyon/hydration.md)
+- [Halcyon relations](halcyon/relations.md)
+- [Halcyon �� QueryBuilder](halcyon/query-builder-integration.md)
+- [QueryBuilder](query-builder/README.md)

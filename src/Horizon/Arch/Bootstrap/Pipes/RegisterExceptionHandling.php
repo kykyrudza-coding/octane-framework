@@ -6,7 +6,8 @@ namespace Horizon\Arch\Bootstrap\Pipes;
 
 use Closure;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
-use Horizon\Contracts\Exception\ExceptionHandlerContract;
+use Horizon\Arch\Exceptions\BindingResolutionException;
+use Horizon\Contracts\Exception\HandlerContract;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
 use Horizon\Support\Pipeline\PipeInterface;
 
@@ -30,9 +31,9 @@ class RegisterExceptionHandling implements PipeInterface
             }
         }
 
-        $handler = $payload->app->make(ExceptionHandlerContract::class);
-        if (! $handler instanceof ExceptionHandlerContract) {
-            throw new \RuntimeException('Exception handler binding must resolve to an ExceptionHandlerContract instance.');
+        $handler = $payload->app->make(HandlerContract::class);
+        if (! $handler instanceof HandlerContract) {
+            throw new BindingResolutionException('Exception handler binding must resolve to a HandlerContract instance.');
         }
 
         $handler->register();

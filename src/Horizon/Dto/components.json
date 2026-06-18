@@ -1,0 +1,5 @@
+{
+    "provider": "Horizon\\Dto\\Providers\\DtoServiceProvider",
+    "name": "octane/dto",
+    "dependencies": {}
+}

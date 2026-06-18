@@ -7,15 +7,16 @@ namespace Horizon\Arch;
 use Closure;
 use Composer\Autoload\ClassLoader;
 use Horizon\Arch\Bootstrap\ApplicationBuilder;
+use Horizon\Arch\Exceptions\BindingResolutionException;
+use Horizon\Arch\Exceptions\InvalidApplicationStateException;
 use Horizon\Arch\Traits\ApplicationEnvironment;
 use Horizon\Arch\Traits\ManagesApplicationPaths;
-use Horizon\Contracts\Arch\Application\ApplicationContract;
-use Horizon\Contracts\Arch\Container\ContainerContract;
+use Horizon\Contracts\Arch\ApplicationContract;
+use Horizon\Contracts\Arch\ContainerContract;
+use Horizon\Contracts\Arch\Http\HttpKernelContract;
 use Horizon\Contracts\Console\ConsoleKernelContract;
-use Horizon\Contracts\Http\HttpKernel\HttpKernelContract;
 use Horizon\Contracts\Http\Request\RequestContextContract;
 use Horizon\Contracts\Support\Providers\ServiceProviderContract;
-use RuntimeException;
 
 class Application implements ApplicationContract
 {
@@ -67,7 +68,7 @@ class Application implements ApplicationContract
     public static function getInstance(): self
     {
         if (static::$instance === null) {
-            throw new RuntimeException('Application has not been initialized.');
+            throw new InvalidApplicationStateException('Application has not been initialized.');
         }
 
         return static::$instance;
@@ -140,11 +141,11 @@ class Application implements ApplicationContract
         $this->runningInConsole = false;
 
         if (! $kernel instanceof HttpKernelContract) {
-            throw new RuntimeException('HTTP kernel binding must resolve to an HttpKernelContract instance.');
+            throw new BindingResolutionException('HTTP kernel binding must resolve to an HttpKernelContract instance.');
         }
 
         if (! isset($this->requestContext)) {
-            throw new RuntimeException('Request context has not been set.');
+            throw new InvalidApplicationStateException('Request context has not been set.');
         }
 
         $response = $kernel->handle($this->requestContext);
@@ -191,7 +192,7 @@ class Application implements ApplicationContract
         ));
 
         if ($loaderPaths === []) {
-            throw new RuntimeException('Unable to infer application base path from Composer loaders.');
+            throw new InvalidApplicationStateException('Unable to infer application base path from Composer loaders.');
         }
 
         return dirname($loaderPaths[0]);

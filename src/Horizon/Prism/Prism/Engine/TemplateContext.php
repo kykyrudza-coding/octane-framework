@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Horizon\Prism\Prism\Engine;
 
-use Horizon\Contracts\Prism\Component\ComponentResolverContract;
-use Horizon\Contracts\Prism\Compiler\PrismCompilerContract;
-use Horizon\Contracts\Prism\Engine\PrismEngineContract;
-use RuntimeException;
+use Horizon\Contracts\Prism\Prism\Component\ComponentResolverContract;
+use Horizon\Contracts\Prism\Prism\Compiler\PrismCompilerContract;
+use Horizon\Contracts\Prism\Prism\Engine\PrismEngineContract;
+use Horizon\Prism\Exceptions\TemplateCompilationException;
+use Horizon\Prism\Exceptions\ViewNotFoundException;
 use Throwable;
 
 /**
@@ -98,7 +99,7 @@ final class TemplateContext
     public function endBlock(): void
     {
         if ($this->currentBlock === null) {
-            throw new RuntimeException('endBlock() called without a matching startBlock().');
+            throw new TemplateCompilationException('endBlock() called without a matching startBlock().');
         }
 
         $this->blocks[$this->currentBlock] = (string) ob_get_clean();
@@ -191,7 +192,7 @@ final class TemplateContext
             }
         }
 
-        throw new RuntimeException(
+        throw new ViewNotFoundException(
             "View '$view' not found in '$this->viewsPath'."
         );
     }

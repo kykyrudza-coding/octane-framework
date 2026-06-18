@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Horizon\Database\Connections\Drivers;
 
-use Horizon\Contracts\Arch\Application\ApplicationContract;
+use Horizon\Contracts\Arch\ApplicationContract;
 use Horizon\Contracts\Database\Connections\Drivers\DriverContract;
-use InvalidArgumentException;
+use Horizon\Database\Exceptions\DatabaseConfigurationException;
+use Horizon\Database\Exceptions\DatabaseConnectionException;
 use PDO;
 use PDOException;
-use RuntimeException;
 
 final class SqliteDriver implements DriverContract
 {
@@ -25,7 +25,7 @@ final class SqliteDriver implements DriverContract
         $database = $config['database'] ?? ':memory:';
 
         if (! is_string($database) || $database === '') {
-            throw new InvalidArgumentException(
+            throw new DatabaseConfigurationException(
                 'SQLite connection config [database] must be a non-empty string.',
             );
         }
@@ -55,7 +55,7 @@ final class SqliteDriver implements DriverContract
 
             return $pdo;
         } catch (PDOException $e) {
-            throw new RuntimeException(
+            throw new DatabaseConnectionException(
                 "SQLite connection failed: {$e->getMessage()}",
                 previous: $e,
             );

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Horizon\Support\ValueObjects;
 
-use InvalidArgumentException;
+use Horizon\Support\Exceptions\ValueObjectException;
 
 final readonly class Interval
 {
@@ -47,7 +47,7 @@ final readonly class Interval
         preg_match('/^(\d+)\s*(second|minute|hour|day|week|month)s?$/', $interval, $matches);
 
         if (empty($matches)) {
-            throw new InvalidArgumentException("Invalid interval format: $interval");
+            throw new ValueObjectException("Invalid interval format: $interval");
         }
 
         $value = (int) $matches[1];
